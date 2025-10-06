@@ -194,3 +194,132 @@ class Admin(models.Model):
     
     def __str__(self):
         return f"Admin: {self.user.get_full_name()} - {self.role}"
+    
+
+class Mentor(models.Model):
+    """
+    Dedicated mentor model for peer support system.
+    Addresses: Students struggling to connect with peers/mentors
+    """
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE, 
+        primary_key=True,
+        related_name='mentor'
+    )
+    
+    expertise_areas = models.CharField(
+        max_length=200,
+        help_text="Areas of expertise (comma-separated)"
+    )
+    grade_levels = models.CharField(
+        max_length=100,
+        help_text="Grade levels they can mentor"
+    )
+    availability = models.JSONField(
+        default=dict,
+        help_text="Weekly availability schedule"
+    )
+    rating = models.FloatField(default=5.0)
+    students_mentored = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return f"Mentor: {self.user.get_full_name()}"
+
+class SchoolFinancialRecord(models.Model):
+    """
+    Financial transparency system.
+    Addresses: Parents demanding transparency in school fund usage
+    """
+    RECORD_TYPE_CHOICES = (
+        ('income', 'Income'),
+        ('expense', 'Expense'),
+        ('budget', 'Budget'),
+    )
+    
+    title = models.CharField(max_length=200)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    record_type = models.CharField(max_length=10, choices=RECORD_TYPE_CHOICES)
+    description = models.TextField()
+    date = models.DateField()
+    category = models.CharField(
+        max_length=100,
+        help_text="e.g., Infrastructure, Salaries, Transport, Supplies"
+    )
+    
+    # Access control
+    is_public = models.BooleanField(
+        default=False,
+        help_text="Can parents view this record?"
+    )
+    
+    created_by = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='created_financial_records'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-date', '-created_at']
+    
+    def __str__(self):
+        return f"{self.title} - ${self.amount} ({self.record_type})"
+
+class StudentRiskAssessment(models.Model):
+    """
+    Early warning system for dropout prevention.
+    Addresses: Student dropouts happening unexpectedly
+    """
+    student = models.ForeignKey(
+        Student, 
+        on_delete=models.CASCADE,
+        related_name='risk_assessments'
+    )
+    assessment_date = models.DateTimeField(auto_now_add=True)
+    risk_score = models.IntegerField(help_text="0-100 risk score")
+    
+    # Store multiple risk factors as JSON
+    factors = models.JSONField(
+        help_text="List of risk factors identified"
+    )
+    recommendations = models.TextField(
+        help_text="Recommended interventions"
+    )
+    
+    assessed_by = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='conducted_assessments'
+    )
+    
+    class Meta:
+        ordering = ['-assessment_date']
+    
+    def __str__(self):
+        return f"Risk Assessment: {self.student.user.get_full_name()} - Score: {self.risk_score}"
+
+class TransportRoute(models.Model):
+    """
+    Transport safety and accountability system.
+    Addresses: School transport needs better safety measures
+    """
+    route_name = models.CharField(max_length=100)
+    driver_name = models.CharField(max_length=100)
+    driver_contact = models.CharField(max_length=15)
+    vehicle_number = models.CharField(max_length=20)
+    current_location = models.CharField(max_length=200, blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    # Track which students are on which route
+    students_on_board = models.ManyToManyField(
+        Student, 
+        blank=True,
+        related_name='transport_routes'
+    )
+    
+    def __str__(self):
+        return f"Route: {self.route_name} - Driver: {self.driver_name}"
+    
+    def get_students_count(self):
+        return self.students_on_board.count()
