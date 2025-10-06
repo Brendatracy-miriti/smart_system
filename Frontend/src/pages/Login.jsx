@@ -2,13 +2,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { useMessage } from "../context/MessageContext";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { setMessage } = useMessage();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +19,7 @@ export default function Login() {
       await login(email, password);
       setLoading(false);
       navigate("/dashboard"); // adjust route
-    } catch (err) {
+    } catch {
       setLoading(false);
       // error message set in AuthContext
     }

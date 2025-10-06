@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { useMessage } from "../context/MessageContext";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const navigate = useNavigate();
   const { signup } = useAuth();
+  const { setMessage } = useMessage();
   const [loading, setLoading] = useState(false);
 
   // signup fields
@@ -24,6 +26,11 @@ export default function Signup() {
       navigate("/dashboard");
     } catch (err) {
       setLoading(false);
+      const errText =
+        err?.response?.data?.detail ||
+        JSON.stringify(err?.response?.data) ||
+        "Signup failed";
+      setMessage({ type: "error", text: errText });
     }
   };
 
