@@ -1,4 +1,3 @@
-// src/pages/Dashboard/StudentDashboard.jsx
 import React, { useEffect, useState } from "react";
 import AreaSpark from "../../components/AreaSpark";
 import api from "../../utils/api";
