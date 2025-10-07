@@ -20,7 +20,7 @@ export default function Transport() {
         ]);
         setBuses(busRes.data || []);
         setLogs(logRes.data || []);
-      } catch (err) {
+      } catch {
         setMessage({ type: "error", text: "Could not fetch transport data." });
       } finally {
         setLoading(false);

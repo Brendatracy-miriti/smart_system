@@ -8,7 +8,7 @@ import {
   YAxis,
 } from "recharts";
 
-export default function AreaSpark({ data = [], color = "#1E3A8A", height = 120 }) {
+export default function AreaSpark({ data = [], color = "#1E3A8A" }) {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-28 bg-surface rounded-lg text-sm text-gray-500">

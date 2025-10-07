@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import FundTable from "../../../ui/FundTable";
 import FundFormModal from "../../../ui/FundFormModal";
@@ -13,17 +13,17 @@ export default function Funds() {
   const [editingFund, setEditingFund] = useState(null);
   const { setMessage } = useMessage();
 
-  const fetchFunds = async () => {
+  const fetchFunds = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get("funds/");
       setFunds(res.data || []);
-    } catch (err) {
+    } catch {
       setMessage({ type: "error", text: "Failed to fetch fund records." });
     } finally {
       setLoading(false);
     }
-  };
+  }, [setMessage]);
 
   const handleSave = async (data) => {
     try {
@@ -37,7 +37,7 @@ export default function Funds() {
       setShowModal(false);
       setEditingFund(null);
       fetchFunds();
-    } catch (err) {
+    } catch {
       setMessage({ type: "error", text: "Failed to save fund record." });
     }
   };
@@ -55,7 +55,7 @@ export default function Funds() {
 
   useEffect(() => {
     fetchFunds();
-  }, []);
+  }, [fetchFunds]);
 
   // Prepare data for chart
   const chartData = funds.map((f) => ({

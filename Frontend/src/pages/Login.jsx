@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useMessage } from "../context/MessageContext";
+import { useAuth } from "../hooks/useAuth";
+import { useMessage } from "../hooks/useMessage";
 
 export default function Login() {
   const { login } = useAuth();
