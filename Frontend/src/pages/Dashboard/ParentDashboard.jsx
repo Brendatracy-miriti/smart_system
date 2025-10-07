@@ -1,4 +1,3 @@
-// src/pages/Dashboard/ParentDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { MapPin, UserCheck } from "lucide-react";
 import AreaSpark from "../../components/AreaSpark";
