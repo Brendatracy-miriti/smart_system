@@ -18,7 +18,7 @@ export default function Login() {
 
     try {
       await login(username.trim(), password.trim());
-    } catch (err) {
+    } catch {
       setMessage({ type: "error", text: "Login failed, please try again." });
     } finally {
       setLoading(false);

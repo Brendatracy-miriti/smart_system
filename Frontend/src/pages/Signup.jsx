@@ -35,7 +35,7 @@ export default function Signup() {
 
       setMessage({ type: "success", text: "Signup successful! Please login." });
       navigate("/login");
-    } catch (err) {
+    } catch {
       setMessage({ type: "error", text: "Signup failed!" });
     } finally {
       setLoading(false);
