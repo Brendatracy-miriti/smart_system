@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AreaSpark from "../../components/AreaSpark";
 import api from "../../utils/api";
-import { useMessage } from "../../context/MessageContext";
+import { useMessage } from "../../hooks/useMessage";
 import { motion } from "framer-motion";
 
 export default function StudentDashboard() {

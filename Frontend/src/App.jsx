@@ -15,9 +15,9 @@ import AcademicInsights from "./pages/Dashboard/Admin/AcademicInsights";
 import Settings from "./pages/Dashboard/Admin/Settings";
 import Users from "./pages/Dashboard/Admin/Users";
 import Transport from "./pages/Dashboard/Admin/Transport";
-import TeacherDashboard from "./pages/Dashboard/TeacherDashboard";
-import ParentDashboard from "./pages/Dashboard/ParentDashboard";
-import StudentDashboard from "./pages/Dashboard/StudentDashboard";
+import TeacherDashboard from "./pages/Dashboard/Teacher/TeacherDashboard";
+import ParentDashboard from "./pages/Dashboard/Parent/ParentDashboard";
+import StudentDashboard from "./pages/Dashboard/Student/StudentDashboard";
 
 // Contexts
 import { MessageProvider } from "./context/MessageContext";

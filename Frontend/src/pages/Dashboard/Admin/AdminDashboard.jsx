@@ -4,7 +4,7 @@ import { Users, FileText, Truck, DollarSign } from "lucide-react";
 import StatCard from "../../../ui/StatCard";
 import FundChart from "../../../ui/FundChart";
 import api from "../../../utils/api";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
