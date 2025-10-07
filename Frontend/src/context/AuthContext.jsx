@@ -1,51 +1,53 @@
-import React, { createContext, useContext, useState } from "react";
-import api from "../utils/api";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMessage } from "./MessageContext";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
   const { setMessage } = useMessage();
 
-  const login = async (email, password) => {
-    try {
-      const res = await api.post("auth/login/", { email, password }); // adjust endpoint
-      // expect token or user
-      setUser(res.data.user || res.data);
-      setMessage({ type: "success", text: "Umeingia vizuri" });
-      return res.data;
-    } catch (err) {
-      const errText =
-        err?.response?.data?.detail || err?.response?.data?.error || "Login failed";
-      setMessage({ type: "error", text: errText });
-      throw err;
-    }
-  };
+  useEffect(() => {
+    const savedUser = JSON.parse(localStorage.getItem("smartedu_user"));
+    if (savedUser) setUser(savedUser);
+  }, []);
 
-  const signup = async (payload) => {
-    try {
-      const res = await api.post("auth/register/", payload); // adjust endpoint
-      setUser(res.data.user || res.data);
-      setMessage({ type: "success", text: "Account imejengwa, welcome!" });
-      return res.data;
-    } catch (err) {
-      const errText =
-        err?.response?.data?.detail ||
-        JSON.stringify(err?.response?.data) ||
-        "Signup failed";
-      setMessage({ type: "error", text: errText });
-      throw err;
+  const login = (username, password) => {
+    // Admin special login
+    if (username === "Admin" && password === "AdminSystem") {
+      const loggedUser = { username, role: "admin" };
+      localStorage.setItem("smartedu_user", JSON.stringify(loggedUser));
+      setUser(loggedUser);
+      setMessage({ type: "success", text: "Welcome back, Admin!" });
+      navigate("/admin");
+      return;
+    }
+
+    // Non-admin login (read from localStorage)
+    const registeredUsers = JSON.parse(localStorage.getItem("smartedu_users")) || [];
+    const found = registeredUsers.find(
+      (u) => u.username === username && u.password === password
+    );
+    if (found) {
+      localStorage.setItem("smartedu_user", JSON.stringify(found));
+      setUser(found);
+      setMessage({ type: "success", text: `Welcome back, ${found.role}!` });
+      navigate(`/${found.role}`);
+    } else {
+      setMessage({ type: "error", text: "Invalid credentials!" });
     }
   };
 
   const logout = () => {
+    localStorage.removeItem("smartedu_user");
     setUser(null);
-    setMessage({ type: "success", text: "Logged Out" });
+    navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
