@@ -1,9 +1,9 @@
 import React, { useContext, useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DataContext } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
-import { useMessage } from "../context/MessageContext"; // you have this already
+import { useMessage } from "../context/MessageContext";
 
 export default function Signup() {
   const { data } = useContext(DataContext);
@@ -38,65 +38,138 @@ export default function Signup() {
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 50 },
-    show: { opacity: 1, y: 0 },
+  const leftVariants = {
+    hidden: { x: -50, opacity: 0 },
+    show: { x: 0, opacity: 1 },
+  };
+  const rightVariants = {
+    hidden: { x: 50, opacity: 0 },
+    show: { x: 0, opacity: 1 },
   };
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="show"
-      variants={containerVariants}
-      transition={{ duration: 0.7 }}
-      className="min-h-screen flex items-center justify-center p-6 bg-surface"
-    >
-      <div className="max-w-md w-full bg-white dark:bg-[#0B1221] p-6 rounded-2xl shadow">
-        <h2 className="text-2xl font-bold text-primary mb-4">Create an account</h2>
+    <div className="min-h-screen flex text-textBody dark:text-gray-100">
+      {/* Left side */}
+      <motion.div
+        initial="hidden"
+        animate="show"
+        variants={leftVariants}
+        transition={{ duration: 0.7 }}
+        className="hidden md:flex w-1/2 flex-col items-center justify-center bg-accent/10"
+      >
+        <div className="max-w-md p-10">
+          <h1 className="text-4xl font-bold text-primary mb-4">Edu-Guardian</h1>
+          <p className="text-textBody mb-6 dark:text-gray-300">
+            Safe. Transparent. Smart. Connect your school community in one
+            platform.
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <select value={role} onChange={e => setRole(e.target.value)} className="w-full p-2 border rounded">
-            <option value="student">Student</option>
-            <option value="parent">Parent</option>
-            <option value="teacher">Teacher</option>
-          </select>
+          <div className="bg-surface dark:bg-[#1F2937] p-4 rounded-xl shadow">
+            <h3 className="font-semibold text-primary">Why Edu-Guardian?</h3>
+            <ul className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+              <li>• Real-time bus tracking & alerts</li>
+              <li>• Transparent school funds</li>
+              <li>• Personalized revision tools</li>
+            </ul>
+          </div>
+        </div>
+      </motion.div>
 
-          <input required value={name} onChange={e=>setName(e.target.value)} placeholder="Full name" className="w-full p-2 border rounded" />
-          <input required value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="Email" className="w-full p-2 border rounded" />
-          <input required value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Password" className="w-full p-2 border rounded" />
+      {/* Right side */}
+      <motion.div
+        initial="hidden"
+        animate="show"
+        variants={rightVariants}
+        transition={{ duration: 0.7 }}
+        className="w-full md:w-1/2 flex items-center justify-center bg-surface dark:bg-[#111827]"
+      >
+        <div className="w-4/5 max-w-md p-8 bg-white dark:bg-[#1F2937] rounded-2xl shadow-lg">
+          <h2 className="text-2xl font-bold text-primary mb-6 text-center">
+            Create an account
+          </h2>
 
-          {/* role specific */}
-          {role === "student" && (
-            <>
-              <input value={admission} onChange={e=>setAdmission(e.target.value)} placeholder="Admission number" className="w-full p-2 border rounded" />
-              <input value={course} onChange={e=>setCourse(e.target.value)} placeholder="Course / Class (e.g. Form 2A)" className="w-full p-2 border rounded" />
-            </>
-          )}
-
-          {role === "parent" && (
-            <>
-              <label className="text-sm text-gray-600">Link to child (select admission)</label>
-              <select value={childStudentId} onChange={e=>setChildStudentId(e.target.value)} className="w-full p-2 border rounded">
-                <option value="">-- choose child (if already registered) --</option>
-                {data.students.map(s => {
-                  const owner = data.users.find(u => u.id === s.userId);
-                  return <option key={s.id} value={s.id}>{s.admission_number} — {owner?.name || "student"}</option>;
-                })}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Role</label>
+              <select value={role} onChange={e => setRole(e.target.value)} className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent">
+                <option value="student">Student</option>
+                <option value="parent">Parent</option>
+                <option value="teacher">Teacher</option>
               </select>
-              <p className="text-xs text-gray-400">If child not created yet, link later in settings.</p>
-            </>
-          )}
+            </div>
 
-          {role === "teacher" && (
-            <>
-              <input value={teacherCourses} onChange={e=>setTeacherCourses(e.target.value)} placeholder="Courses taught (comma separated)" className="w-full p-2 border rounded" />
-              <p className="text-xs text-gray-400">e.g. Math,Physics,Form 2A</p>
-            </>
-          )}
+            <div>
+              <label className="block text-sm font-medium mb-1">Full Name</label>
+              <input required value={name} onChange={e=>setName(e.target.value)} placeholder="Your full name" className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent" />
+            </div>
 
-          <button type="submit" className="w-full py-2 bg-primary text-white rounded">Create account</button>
-        </form>
-      </div>
-    </motion.div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input required value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="your@email.com" className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Password</label>
+              <input required value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Your password" className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent" />
+            </div>
+
+            {/* role specific */}
+            {role === "student" && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Admission Number</label>
+                  <input value={admission} onChange={e=>setAdmission(e.target.value)} placeholder="e.g. 2023001" className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Course / Class</label>
+                  <input value={course} onChange={e=>setCourse(e.target.value)} placeholder="e.g. Form 2A" className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent" />
+                </div>
+              </>
+            )}
+
+            {role === "parent" && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Link to Child</label>
+                  <select value={childStudentId} onChange={e=>setChildStudentId(e.target.value)} className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent">
+                    <option value="">-- Select child (if already registered) --</option>
+                    {data.students.map(s => {
+                      const owner = data.users.find(u => u.id === s.userId);
+                      return <option key={s.id} value={s.id}>{s.admission_number} — {owner?.name || "student"}</option>;
+                    })}
+                  </select>
+                  <p className="text-xs text-gray-400 mt-1">If child not created yet, link later in settings.</p>
+                </div>
+              </>
+            )}
+
+            {role === "teacher" && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Courses Taught</label>
+                  <input value={teacherCourses} onChange={e=>setTeacherCourses(e.target.value)} placeholder="e.g. Math, Physics, Form 2A" className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent" />
+                  <p className="text-xs text-gray-400 mt-1">Comma separated</p>
+                </div>
+              </>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3 rounded-lg text-white font-semibold transition"
+              style={{ backgroundColor: "#1E3A8A" }}
+            >
+              Create Account
+            </button>
+          </form>
+
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+            Already have an account?{" "}
+            <Link to="/login" className="text-accent font-semibold underline">
+              Sign in
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   );
 }
