@@ -1,42 +1,30 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { useMessage } from "../context/MessageContext";
+import loginIllustration from "../assets/login-signup illustration.svg";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 
 export default function Signup() {
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const { setMessage } = useMessage();
 
-  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const existing =
-        JSON.parse(localStorage.getItem("smartedu_users")) || [];
-
-      if (existing.find((u) => u.username === username)) {
-        setMessage({ type: "error", text: "Username already exists!" });
-        setLoading(false);
-        return;
-      }
-
-      const newUser = { username, password, name, role };
-      localStorage.setItem(
-        "smartedu_users",
-        JSON.stringify([...existing, newUser])
-      );
-
-      setMessage({ type: "success", text: "Signup successful! Please login." });
-      navigate("/login");
+      await login(username.trim(), password.trim());
     } catch {
-      setMessage({ type: "error", text: "Signup failed!" });
+      setMessage({ type: "error", text: "Login failed, please try again." });
     } finally {
       setLoading(false);
     }
@@ -51,126 +39,150 @@ export default function Signup() {
     show: { x: 0, opacity: 1 },
   };
 
+  // toggle function
+  const togglePassword = () => setShowPassword((prev) => !prev);
+
   return (
-    <div className="min-h-screen flex text-textBody dark:text-gray-100">
-      {/* Left side */}
-      <motion.div
-        initial="hidden"
-        animate="show"
-        variants={leftVariants}
-        transition={{ duration: 0.7 }}
-        className="hidden md:flex w-1/2 flex-col items-center justify-center bg-primary/10"
-      >
-        <div className="max-w-md p-10">
-          <h1 className="text-4xl font-bold text-primary mb-4">
-            Welcome to SmartEdu360
-          </h1>
-          <p className="text-textBody mb-6 dark:text-gray-300">
-            Create your account and join your school’s digital community.
-          </p>
-
-          <div className="bg-surface dark:bg-[#1F2937] p-4 rounded-xl shadow">
-            <h3 className="font-semibold text-primary">Get started</h3>
-            <ul className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-              <li>• Manage student data</li>
-              <li>• Track buses live</li>
-              <li>• See fund transparency</li>
-            </ul>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Right side */}
-      <motion.div
-        initial="hidden"
-        animate="show"
-        variants={rightVariants}
-        transition={{ duration: 0.7 }}
-        className="w-full md:w-1/2 flex items-center justify-center bg-surface dark:bg-[#111827]"
-      >
-        <div className="w-4/5 max-w-md p-8 bg-white dark:bg-[#1F2937] rounded-2xl shadow-lg">
-          <h2 className="text-2xl font-bold text-primary mb-6 text-center">
-            Create account
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Full name
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent"
-                placeholder="Jane Doe"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Username
-              </label>
-              <input
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent"
-                placeholder="janedoe"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent"
-                placeholder="Create a password"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Select Role
-              </label>
-              <select
-                required
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent"
-              >
-                <option value="">-- choose role --</option>
-                <option value="teacher">Teacher</option>
-                <option value="parent">Parent</option>
-                <option value="student">Student</option>
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-lg text-white font-semibold transition"
-              style={{ backgroundColor: "#1E3A8A" }}
-            >
-              {loading ? "Please wait..." : "Create account"}
-            </button>
-          </form>
-
-          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
-            Already have an account?{" "}
-            <Link to="/login" className="text-accent font-semibold underline">
-              Login
-            </Link>
-          </div>
-        </div>
-      </motion.div>
+    <div className="flex h-screen w-full">
+      {/* LEFT SIDE - Illustration + Welcome text */}
+<motion.div
+  initial="hidden"
+  animate="show"
+  variants={leftVariants}
+  transition={{ duration: 0.7 }}
+  className="hidden md:flex w-3/5 flex-col items-center justify-center text-white bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600"
+>
+  <div className="w-4/5 flex flex-col items-center text-center px-8">
+    <h2 className="text-4xl font-bold mb-4">Welcome to Edu-Guardian</h2>
+    <p className="text-lg mb-6 text-white/90">
+      Safe. Transparent. Smart. Connect your school community in one platform.
+    </p>
+    
+    {/* Why EduGuardian Box */}
+    <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-lg mb-8 w-2/4">
+      <h3 className="font-semibold text-white text-lg mb-2">Why EduGuardian?</h3>
+      <ul className="mt-3 text-sm text-white/90 space-y-1">
+        <li>• Real-time bus tracking & alerts</li>
+        <li>• Transparent school funds</li>
+        <li>• Personalized revision tools</li>
+      </ul>
     </div>
-  );
+    
+    <img
+      src={loginIllustration}
+      alt="Login illustration"
+      className="w-3/4 mx-auto drop-shadow-lg"
+    />
+  </div>
+</motion.div>
+
+      {/* RIGHT SIDE - Signup Form */}
+<motion.div
+  initial="hidden"
+  animate="show"
+  variants={rightVariants}
+  transition={{ duration: 0.7 }}
+  className="w-full md:w-2/5 flex items-center justify-center bg-[#0f172a] text-white"
+>
+  <div className="max-w-md w-full mx-auto px-10">
+    <h1 className="text-3xl font-bold mb-2 text-center">Create Account</h1>
+    <p className="text-gray-400 mb-8 text-center">
+      Fill in your details to get started
+    </p>
+
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Full Name */}
+      <div>
+        <label className="block mb-2 text-sm">Full Name</label>
+        <input
+          type="text"
+          placeholder="Jane Doe"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+      </div>
+
+      {/* Username */}
+      <div>
+        <label className="block mb-2 text-sm">Username</label>
+        <input
+          type="text"
+          placeholder="janedoe"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+      </div>
+
+      {/* Password */}
+      <div>
+  <label className="block mb-2 text-sm">Password</label>
+
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      placeholder="Create a password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="w-full px-4 py-2 pr-10 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    />
+
+    {/* Eye icon inside input */}
+    <button
+      type="button"
+      onClick={togglePassword}
+      className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
+    >
+      {showPassword ? (
+        <AiOutlineEyeInvisible size={20} />
+      ) : (
+        <AiOutlineEye size={20} />
+      )}
+    </button>
+  </div>
+</div>
+
+      {/* Role Select */}
+      <div>
+        <label className="block mb-2 text-sm">Select Role</label>
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        >
+          <option value="">-- choose role --</option>
+          <option value="teacher">Teacher</option>
+          <option value="parent">Parent</option>
+          <option value="student">Student</option>
+        </select>
+      </div>
+
+      {/* Signup Button */}
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-md font-semibold transition"
+      >
+        {loading ? "Creating account..." : "Create Account"}
+      </button>
+    </form>
+
+    <p className="text-gray-400 text-sm mt-6 text-center">
+      Already have an account?{" "}
+      <Link
+        to="/login"
+        className="text-sky-400 hover:underline font-medium"
+      >
+        Login
+      </Link>
+    </p>
+  </div>
+</motion.div>
+</div>
+);
 }
