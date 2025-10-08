@@ -37,7 +37,7 @@ export default function Sidebar() {
     <>
       {/* Mobile topbar */}
       <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-[#111827] shadow-md">
-        <h1 className="text-lg font-bold text-primary">SmartEdu360</h1>
+        <h1 className="text-lg font-bold text-primary">Edu-Guardian</h1>
         <button
           onClick={() => setOpen(true)}
           className="text-gray-700 dark:text-gray-200"
@@ -49,7 +49,7 @@ export default function Sidebar() {
       {/* Sidebar (Desktop) */}
       <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-[#111827] text-gray-800 dark:text-gray-200 min-h-screen shadow-lg">
         <div className="p-5">
-          <h1 className="text-xl font-bold text-primary">SmartEdu360</h1>
+          <h1 className="text-xl font-bold text-primary">Edu-Guardian</h1>
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
@@ -100,7 +100,7 @@ export default function Sidebar() {
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <h1 className="text-xl font-bold text-primary">SmartEdu360</h1>
+                  <h1 className="text-xl font-bold text-primary">Edu-Guardian</h1>
                   <button
                     onClick={() => setOpen(false)}
                     className="text-gray-700 dark:text-gray-200"

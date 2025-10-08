@@ -72,7 +72,7 @@ export default function Signup() {
       >
         <div className="max-w-md p-10">
           <h1 className="text-4xl font-bold text-primary mb-4">
-            Welcome to SmartEdu360
+            Welcome to Edu-Guardian
           </h1>
           <p className="text-textBody mb-6 dark:text-gray-300">
             Create your account and join your school’s digital community.

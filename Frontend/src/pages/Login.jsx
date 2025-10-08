@@ -46,14 +46,14 @@ export default function Login() {
         className="hidden md:flex w-1/2 flex-col items-center justify-center bg-accent/10"
       >
         <div className="max-w-md p-10">
-          <h1 className="text-4xl font-bold text-primary mb-4">SmartEdu360</h1>
+          <h1 className="text-4xl font-bold text-primary mb-4">Edu-Guardian</h1>
           <p className="text-textBody mb-6 dark:text-gray-300">
             Safe. Transparent. Smart. Connect your school community in one
             platform.
           </p>
 
           <div className="bg-surface dark:bg-[#1F2937] p-4 rounded-xl shadow">
-            <h3 className="font-semibold text-primary">Why SmartEdu360?</h3>
+            <h3 className="font-semibold text-primary">Why Edu-Guardian?</h3>
             <ul className="mt-3 text-sm text-gray-600 dark:text-gray-400">
               <li>• Real-time bus tracking & alerts</li>
               <li>• Transparent school funds</li>

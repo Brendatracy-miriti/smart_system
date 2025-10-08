@@ -38,7 +38,7 @@ export default function DashboardLayout() {
               open ? "block" : "hidden"
             } text-primary`}
           >
-            SmartEdu360
+            Edu-Guardian
           </h1>
           <button
             onClick={() => setOpen(!open)}
