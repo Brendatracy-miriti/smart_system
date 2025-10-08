@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 
 // Auth
@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 // Admin
+import AdminLayout from "./pages/Dashboard/Admin/AdminLayout";
 import AdminDashboard from "./pages/Dashboard/Admin/AdminDashboard";
 import Users from "./pages/Dashboard/Admin/Users";
 import Transport from "./pages/Dashboard/Admin/Transport";
@@ -60,13 +61,16 @@ function AnimatedRoutes() {
         <Route path="/signup" element={<Signup />} />
 
         {/* ==================== ADMIN ==================== */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<Users />} />
-        <Route path="/admin/transport" element={<Transport />} />
-        <Route path="/admin/funds" element={<Funds />} />
-        <Route path="/admin/notifications" element={<Notifications />} />
-        <Route path="/admin/academic-insights" element={<AcademicInsights />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/*" element={<AdminLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<Users />} />
+          <Route path="transport" element={<Transport />} />
+          <Route path="funds" element={<Funds />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="academic-insights" element={<AcademicInsights />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
 
         {/* ==================== TEACHER ==================== */}
         <Route path="/teacher/*" element={<TeacherSidebar />}>

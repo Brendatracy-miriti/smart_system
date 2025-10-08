@@ -5,8 +5,6 @@ import StatCard from "../../../ui/StatCard";
 import FundChart from "../../../ui/FundChart";
 import api from "../../../utils/api";
 import { useMessage } from "../../../hooks/useMessage";
-import Sidebar from "./Sidebar";
-
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({
@@ -82,14 +80,12 @@ export default function AdminDashboard() {
   }, [setMessage]);
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="flex-1 p-6 space-y-8"
-      >
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="p-6 space-y-8"
+    >
         {/* Header */}
         <div>
           <h2 className="text-3xl font-bold text-primary mb-2">Admin Dashboard</h2>
@@ -153,7 +149,6 @@ export default function AdminDashboard() {
             </button>
           </div>
         </div>
-      </motion.div>
-    </div>
+    </motion.div>
   );
 }

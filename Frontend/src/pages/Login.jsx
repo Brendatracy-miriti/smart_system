@@ -127,10 +127,7 @@ export default function Login() {
             </Link>
           </div>
 
-          <p className="text-xs text-center mt-6 text-gray-500">
-            Tip: Use <span className="font-semibold">Admin / AdminSystem</span>{" "}
-            for Admin login.
-          </p>
+          
         </div>
       </motion.div>
     </div>
