@@ -1,75 +1,87 @@
 import React, { useEffect, useState } from "react";
-
 import { motion } from "framer-motion";
-import api from "../../utils/api";
-import { useMessage } from "../../hooks/useMessage";
-import AreaSpark from "../../components/AreaSpark";
+import api from "../../../utils/api";
+import { useMessage } from "../../../context/MessageContext";
+import MiniChart from "../../../ui/MiniChart";
+import StatCard from "../../../ui/StatCard";
 
 export default function TeacherDashboard() {
   const [loading, setLoading] = useState(true);
-  const [classes, setClasses] = useState([]); // expected from backend: classes list
-  const [studentsPerformance, setStudentsPerformance] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [performance, setPerformance] = useState([]);
   const { setMessage } = useMessage();
 
   useEffect(() => {
     let mounted = true;
-    const fetchTeacherData = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        // endpoints depend on backend — adjust as needed
-        const [classesRes, perfRes] = await Promise.all([
-          api.get("classes/"), // expected: teacher's classes
-          api.get("students/performance/"), // expected: list of {label, value}
+        const [classRes, perfRes] = await Promise.all([
+          api.get("classes/"),
+          api.get("students/performance/"),
         ]);
         if (!mounted) return;
-        setClasses(Array.isArray(classesRes.data) ? classesRes.data : []);
-        setStudentsPerformance(Array.isArray(perfRes.data) ? perfRes.data : []);
+        setClasses(classRes.data || []);
+        setPerformance(perfRes.data || []);
+      } catch (e) {
+        setMessage({ type: "error", text: "Failed to fetch teacher data" });
+      } finally {
         setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        console.error(err);
-        setMessage({ type: "error", text: "Could not fetch teacher data" });
       }
     };
-
-    fetchTeacherData();
-    return () => { mounted = false; };
+    fetchData();
+    return () => (mounted = false);
   }, [setMessage]);
 
   return (
-    <div>
-      <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-2xl font-bold text-primary mb-4">
-        Teacher Dashboard
-      </motion.h2>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="p-6 space-y-8"
+    >
+      <div>
+        <h2 className="text-3xl font-bold text-primary mb-2">Teacher Dashboard</h2>
+        <p className="text-gray-500 dark:text-gray-400">
+          Welcome back! Monitor your classes and performance insights here.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard title="My Classes" value={classes.length} color="blue-500" />
+        <StatCard title="Average Attendance" value="91%" color="green-500" />
+        <StatCard title="Active Assignments" value="6" color="cyan-500" />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-[#071027] p-5 rounded-2xl shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-textBody dark:text-gray-200">Class performance</h3>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Overview</div>
-          </div>
-
-          <AreaSpark data={studentsPerformance} color="#38BDF8" />
+        <div className="lg:col-span-2 bg-white dark:bg-[#1F2937] p-5 rounded-2xl shadow-sm">
+          <h3 className="font-semibold mb-3 text-gray-800 dark:text-gray-100">
+            Student Performance Trend
+          </h3>
+          <MiniChart data={performance} color="#10B981" height={150} />
         </div>
 
-        <div className="bg-white dark:bg-[#071027] p-5 rounded-2xl shadow-sm">
-          <h3 className="font-semibold text-textBody dark:text-gray-200 mb-3">My classes</h3>
+        <div className="bg-white dark:bg-[#1F2937] p-5 rounded-2xl shadow-sm">
+          <h3 className="font-semibold mb-3 text-gray-800 dark:text-gray-100">My Classes</h3>
           {loading ? (
-            <div className="text-gray-500">Loading classes...</div>
+            <p className="text-gray-500">Loading...</p>
           ) : classes.length ? (
             <ul className="space-y-2">
               {classes.map((c) => (
-                <li key={c.id} className="p-2 rounded-md border border-gray-100 dark:border-gray-700">
+                <li
+                  key={c.id}
+                  className="p-2 border border-gray-100 dark:border-gray-700 rounded-lg"
+                >
                   <div className="font-medium">{c.name}</div>
-                  <div className="text-sm text-gray-500">{c.schedule || c.section}</div>
+                  <div className="text-sm text-gray-500">{c.schedule || "No schedule"}</div>
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="text-gray-500">No classes assigned yet.</div>
+            <p className="text-gray-500">No classes assigned yet.</p>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
