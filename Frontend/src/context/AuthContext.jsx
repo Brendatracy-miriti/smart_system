@@ -1,56 +1,56 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMessage } from "../hooks/useMessage";
+import React, { createContext, useContext, useState } from "react";
+import { DataContext } from "./DataContext";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate();
-  const { setMessage } = useMessage();
+export function AuthProvider({ children }) {
+  const { createUser, findUserByEmail, createStudentProfile, createParentProfile, createTeacherProfile } = useContext(DataContext);
+  const [current, setCurrent] = useState(() => {
+    try {
+      const raw = localStorage.getItem("eduguardian_auth");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
 
-  useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem("smartedu_user"));
-    if (savedUser) setUser(savedUser);
-  }, []);
-
-  const login = (username, password) => {
-    // Admin special login
-    if (username === "Admin" && password === "AdminSystem") {
-      const loggedUser = { username, role: "admin" };
-      localStorage.setItem("smartedu_user", JSON.stringify(loggedUser));
-      setUser(loggedUser);
-      setMessage({ type: "success", text: "Welcome back, Admin!" });
-      navigate("/admin");
-      return;
+  const signup = async ({ name, email, password, role, extra }) => {
+    // extra contains role specific fields (course, admission, childStudentId, courses for teacher)
+    if (findUserByEmail(email)) throw new Error("Email already in use");
+    const user = createUser({ name, email, password, role, avatarBase64: extra?.avatar || null });
+    // create role profile
+    if (role === "student") {
+      const student = createStudentProfile({ userId: user.id, admission_number: extra.admission, course: extra.course });
+      // optionally create class mapping later
+    } else if (role === "parent") {
+      createParentProfile({ userId: user.id, childStudentId: extra.childStudentId });
+    } else if (role === "teacher") {
+      createTeacherProfile({ userId: user.id, courses: extra.courses || [] });
     }
 
-    // Non-admin login (read from localStorage)
-    const registeredUsers = JSON.parse(localStorage.getItem("smartedu_users")) || [];
-    const found = registeredUsers.find(
-      (u) => u.username === username && u.password === password
-    );
-    if (found) {
-      localStorage.setItem("smartedu_user", JSON.stringify(found));
-      setUser(found);
-      setMessage({ type: "success", text: `Welcome back, ${found.role}!` });
-      navigate(`/${found.role}`);
-    } else {
-      setMessage({ type: "error", text: "Invalid credentials!" });
-    }
+    // auto-login
+    setCurrent(user);
+    localStorage.setItem("eduguardian_auth", JSON.stringify(user));
+    return user;
+  };
+
+  const login = async ({ email, password }) => {
+    const user = findUserByEmail(email);
+    if (!user) throw new Error("User not found");
+    if (user.password !== password) throw new Error("Invalid password");
+    setCurrent(user);
+    localStorage.setItem("eduguardian_auth", JSON.stringify(user));
+    return user;
   };
 
   const logout = () => {
-    localStorage.removeItem("smartedu_user");
-    setUser(null);
-    navigate("/login");
+    setCurrent(null);
+    localStorage.removeItem("eduguardian_auth");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, setUser }}>
+    <AuthContext.Provider value={{ current, signup, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-
+export const useAuth = () => useContext(AuthContext);
