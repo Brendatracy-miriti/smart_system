@@ -1,73 +1,118 @@
 import React, { useEffect, useState } from "react";
-import AreaSpark from "../../components/AreaSpark";
-import api from "../../utils/api";
-import { useMessage } from "../../hooks/useMessage";
 import { motion } from "framer-motion";
+import api from "../../../utils/api";
+import { useMessage } from "../../../context/MessageContext";
+import ProgressRing from "../../../ui/ProgressRing";
+import MiniCard from "../../../ui/MiniCard";
+import { BookOpen, Clock, ClipboardList } from "lucide-react";
 
 export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
-  const [performance, setPerformance] = useState([]);
+  const [profile, setProfile] = useState(null);
   const [upcoming, setUpcoming] = useState([]);
   const { setMessage } = useMessage();
 
   useEffect(() => {
     let mounted = true;
-    const fetchStudent = async () => {
+    const fetchStudentData = async () => {
       setLoading(true);
       try {
-        const [perfRes, tasksRes] = await Promise.all([
-          api.get("my/performance/"), // expects array {label, value}
-          api.get("my/upcoming/"), // expects array of upcoming tasks/assignments
+        const [profileRes, upcomingRes] = await Promise.all([
+          api.get("student/me/"),
+          api.get("student/upcoming/"),
         ]);
         if (!mounted) return;
-        setPerformance(Array.isArray(perfRes.data) ? perfRes.data : []);
-        setUpcoming(Array.isArray(tasksRes.data) ? tasksRes.data : []);
+        setProfile(profileRes.data);
+        setUpcoming(upcomingRes.data || []);
         setLoading(false);
       } catch (err) {
         console.error(err);
+        setMessage({ type: "error", text: "Could not fetch student dashboard data." });
         setLoading(false);
-        setMessage({ type: "error", text: "Could not fetch student data" });
       }
     };
-
-    fetchStudent();
-    return () => { mounted = false; };
+    fetchStudentData();
+    return () => (mounted = false);
   }, [setMessage]);
 
   return (
-    <div>
-      <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-2xl font-bold text-primary mb-4">
-        Student Dashboard
-      </motion.h2>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="space-y-6"
+    >
+      {/* Header */}
+      <div>
+        <h2 className="text-3xl font-bold text-blue-600">Welcome back 👋</h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Here’s your progress overview for today.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-[#071027] p-5 rounded-2xl shadow-sm">
-          <h3 className="font-semibold text-textBody dark:text-gray-200 mb-3">Performance</h3>
-          <AreaSpark data={performance} color="#1E3A8A" />
-          <div className="mt-4">
-            <h4 className="font-semibold text-textBody dark:text-gray-200 mb-2">Upcoming</h4>
-            {loading ? (
-              <div className="text-gray-500">Loading...</div>
-            ) : upcoming.length ? (
-              <ul className="space-y-2">
-                {upcoming.map((u) => (
-                  <li key={u.id} className="p-3 rounded-lg border border-gray-100 dark:border-gray-700">
-                    <div className="font-medium">{u.title}</div>
-                    <div className="text-xs text-gray-500">{u.due_date ? new Date(u.due_date).toLocaleDateString() : "No date"}</div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="text-gray-500">No upcoming tasks found.</div>
-            )}
+      {/* Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500">Attendance</p>
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+              {profile?.attendance_rate ?? "--"}%
+            </h3>
           </div>
+          <ProgressRing percentage={profile?.attendance_rate || 0} color="#3B82F6" />
         </div>
 
-        <div className="bg-white dark:bg-[#071027] p-5 rounded-2xl shadow-sm">
-          <h4 className="font-semibold text-textBody dark:text-gray-200 mb-3">Mentorship</h4>
-          <div className="text-sm text-gray-500">Request a mentor or join study groups from the mentorship hub.</div>
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500">Average Score</p>
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+              {profile?.average_score ?? "--"}%
+            </h3>
+          </div>
+          <ProgressRing percentage={profile?.average_score || 0} color="#10B981" />
+        </div>
+
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500">Courses</p>
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+              {profile?.courses_count ?? 0}
+            </h3>
+          </div>
+          <BookOpen className="text-blue-500" size={32} />
         </div>
       </div>
-    </div>
+
+      {/* Upcoming Lessons */}
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md">
+        <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100 mb-4">
+          Upcoming Lessons
+        </h3>
+        {loading ? (
+          <p className="text-gray-500">Loading...</p>
+        ) : upcoming.length ? (
+          <ul className="space-y-3">
+            {upcoming.map((lesson) => (
+              <li key={lesson.id} className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-2">
+                <div>
+                  <p className="font-medium text-gray-800 dark:text-gray-200">{lesson.subject}</p>
+                  <p className="text-sm text-gray-500">{lesson.time}</p>
+                </div>
+                <Clock className="text-blue-500" size={18} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500">No upcoming lessons for today.</p>
+        )}
+      </div>
+
+      {/* Quick Access */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <MiniCard title="Assignments" description="View pending work" icon={ClipboardList} color="blue" />
+        <MiniCard title="Grades" description="Check term results" icon={BarChart2} color="green" />
+        <MiniCard title="Timetable" description="See daily schedule" icon={Clock} color="purple" />
+      </div>
+    </motion.div>
   );
 }
