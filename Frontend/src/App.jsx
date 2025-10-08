@@ -38,6 +38,7 @@ import ParentSettings from "./pages/Dashboard/Parent/Settings";
 // Student
 import StudentSidebar from "./pages/Dashboard/Student/Sidebar";
 import StudentDashboard from "./pages/Dashboard/Student/StudentDashboard";
+import Courses from "./pages/Dashboard/Student/Courses";
 import AssignmentsPage from "./pages/Dashboard/Student/Assignments";
 import Grades from "./pages/Dashboard/Student/Grades";
 import TimetablePage from "./pages/Dashboard/Student/TimeTable";
@@ -96,6 +97,7 @@ function AnimatedRoutes() {
         {/* ==================== STUDENT ==================== */}
         <Route path="/student/*" element={<StudentSidebar />}>
           <Route index element={<StudentDashboard />} />
+          <Route path="courses" element={<Courses />} />
           <Route path="assignments" element={<AssignmentsPage />} />
           <Route path="grades" element={<Grades />} />
           <Route path="timetable" element={<TimetablePage />} />
