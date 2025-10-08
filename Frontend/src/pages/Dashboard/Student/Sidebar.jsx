@@ -7,7 +7,7 @@ export default function StudentSidebar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("smartedu_user");
     navigate("/login");
   };
 

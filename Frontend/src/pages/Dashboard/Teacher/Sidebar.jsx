@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Outlet } from "react-router-dom";
 import {
   Home,
   ClipboardCheck,
@@ -30,12 +30,12 @@ export default function TeacherSidebar() {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("smartedu_user");
     navigate("/login");
   };
 
   return (
-    <>
+    <div className="flex min-h-screen">
       {/* Mobile Toggle */}
       <button
         onClick={() => setOpen(!open)}
@@ -46,7 +46,7 @@ export default function TeacherSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static top-0 left-0 h-full w-64 bg-white dark:bg-[#111827] shadow-xl p-5 flex flex-col justify-between transition-transform duration-300 ${
+        className={`fixed lg:static top-0 left-0 h-full w-64 bg-white dark:bg-[#111827] shadow-xl p-5 flex flex-col justify-between transition-transform duration-300 z-40 ${
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -89,6 +89,11 @@ export default function TeacherSidebar() {
           </button>
         </div>
       </aside>
-    </>
+
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-0 p-6 bg-gray-50 dark:bg-gray-950 overflow-y-auto">
+        <Outlet />
+      </div>
+    </div>
   );
 }

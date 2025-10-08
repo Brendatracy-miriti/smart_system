@@ -19,7 +19,7 @@ export default function Sidebar() {
   const [open, setOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("smartedu_user");
     navigate("/login");
   };
 
