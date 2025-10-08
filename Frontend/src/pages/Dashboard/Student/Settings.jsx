@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 
 export default function Settings() {
   const [theme, setTheme] = useState("light");

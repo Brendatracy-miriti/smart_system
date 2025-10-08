@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import UserTable from "../../../ui/UserTable";
 import UserFormModal from "../../../ui/UserFormModal";
 import api from "../../../utils/api";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 
 export default function Users() {
   const { setMessage } = useMessage();

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import BusTable from "../../../ui/BusTable";
 import TransportLogList from "../../../ui/TransportLogList";
 import api from "../../../utils/api";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 
 export default function Transport() {
   const [buses, setBuses] = useState([]);

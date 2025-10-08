@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ClipboardList, Clock } from "lucide-react";
 import api from "../../../utils/api";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState([]);

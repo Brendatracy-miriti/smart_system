@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Bell, Trash2, CheckCircle2, AlertTriangle, Bus, DollarSign } from "lucide-react";
 import api from "../../../utils/api";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);

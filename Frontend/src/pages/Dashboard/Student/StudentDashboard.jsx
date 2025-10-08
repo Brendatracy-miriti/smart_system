@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../../utils/api";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 import ProgressRing from "../../../ui/ProgressRing";
 import MiniCard from "../../../ui/MiniCard";
 import { BookOpen, Clock, ClipboardList, BarChart2 } from "lucide-react";

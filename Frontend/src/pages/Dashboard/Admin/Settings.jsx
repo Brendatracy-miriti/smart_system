@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import ThemeToggle from "../../../ui/ThemeToggle";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 import api from "../../../utils/api";
 import { User, Bell, Lock } from "lucide-react";
 

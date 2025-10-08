@@ -4,7 +4,7 @@ import FundTable from "../../../ui/FundTable";
 import FundFormModal from "../../../ui/FundFormModal";
 import FundChart from "../../../ui/FundChart";
 import api from "../../../utils/api";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 
 export default function Funds() {
   const [funds, setFunds] = useState([]);

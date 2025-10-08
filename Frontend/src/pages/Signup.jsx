@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { useMessage } from "../context/MessageContext";
+import { useMessage } from "../hooks/useMessage";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ export default function Signup() {
 
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("");j
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);

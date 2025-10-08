@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMessage } from "./MessageContext";
+import { useMessage } from "../hooks/useMessage";
 
 export const AuthContext = createContext();
 

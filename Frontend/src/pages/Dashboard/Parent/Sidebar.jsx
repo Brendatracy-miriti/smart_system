@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Home, BarChart3, Bus, MessageSquare, CreditCard, Settings, LogOut, Menu, X } from "lucide-react";
-import { useTheme } from "../../../context/ThemeContext";
+import { useTheme } from "../../../hooks/useTheme";
 
 export default function ParentSidebar() {
   const [open, setOpen] = useState(false);

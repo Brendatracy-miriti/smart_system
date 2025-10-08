@@ -13,7 +13,7 @@ import {
   Legend,
 } from "recharts";
 import api from "../../../utils/api";
-import { useMessage } from "../../../context/MessageContext";
+import { useMessage } from "../../../hooks/useMessage";
 import { TrendingUp, AlertTriangle, BookOpen } from "lucide-react";
 
 export default function AcademicInsights() {
