@@ -1,55 +1,36 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import TableCard from "../../../ui/TableCard";
+import React from "react";
+import { useLive } from "../../../context/LiveContext";
+import { addAttendance } from "../../../utils/localData";
+import { useAuth } from "../../../context/AuthContext";
+import { useMessage } from "../../../context/MessageContext";
+import { v4 as uuidv4 } from "uuid";
 
-export default function Attendance() {
-  const [attendance, setAttendance] = useState([
-    { name: "John Doe", status: "Present" },
-    { name: "Jane Wanjiru", status: "Absent" },
-  ]);
+export default function TeacherAttendance() {
+  const { students, classes, refresh } = useLive();
+  const { current } = useAuth();
+  const { setMessage } = useMessage();
 
-  const toggleStatus = (idx) => {
-    setAttendance((prev) =>
-      prev.map((row, i) =>
-        i === idx ? { ...row, status: row.status === "Present" ? "Absent" : "Present" } : row
-      )
-    );
+  // For simplicity, present list of students to mark present
+  const handleMark = (student) => {
+    addAttendance({ id: uuidv4(), classId: "manual", studentId: student.id, date: new Date().toISOString().slice(0,10), status: "present" });
+    setMessage({ type: "success", text: `Marked ${student.admission_number || student.email} present` });
+    window.dispatchEvent(new Event("storage")); setTimeout(()=>refresh && refresh(), 300);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="p-6 space-y-6"
-    >
-      <h2 className="text-2xl font-bold text-primary">Class Attendance</h2>
-      <TableCard
-        title="Today's Attendance"
-        columns={["Student", "Status", "Action"]}
-        data={attendance.map((a, idx) => ({
-          Student: a.name,
-          Status: (
-            <span
-              className={`px-2 py-1 rounded-full text-xs ${
-                a.status === "Present"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {a.status}
-            </span>
-          ),
-          Action: (
-            <button
-              onClick={() => toggleStatus(idx)}
-              className="px-3 py-1 text-sm rounded-md bg-primary text-white hover:bg-accent"
-            >
-              Toggle
-            </button>
-          ),
-        }))}
-      />
-    </motion.div>
+    <div className="p-4">
+      <h2 className="text-2xl font-bold text-primary mb-4">Attendance</h2>
+      <div className="space-y-2">
+        {students.length ? students.map(s => (
+          <div key={s.id} className="bg-white dark:bg-[#071027] p-3 rounded flex justify-between">
+            <div>
+              <div className="font-medium">{s.admission_number || s.email}</div>
+              <div className="text-xs text-gray-500">{s.course}</div>
+            </div>
+            <button onClick={()=>handleMark(s)} className="px-3 py-1 bg-primary text-white rounded">Mark Present</button>
+          </div>
+        )) : <div className="text-gray-500">No students found.</div>}
+      </div>
+    </div>
   );
 }

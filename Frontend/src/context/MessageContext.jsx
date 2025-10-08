@@ -31,4 +31,6 @@ export const MessageProvider = ({ children }) => {
   );
 };
 
+export const useMessage = () => useContext(MessageContext);
+
 

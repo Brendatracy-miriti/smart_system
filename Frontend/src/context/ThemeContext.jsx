@@ -2,8 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 export const ThemeContext = createContext();
 
-
-
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     // Get initial theme from localStorage or default to 'light'
@@ -32,3 +30,5 @@ export const ThemeProvider = ({ children }) => {
     </ThemeContext.Provider>
   );
 };
+
+export const useTheme = () => useContext(ThemeContext);

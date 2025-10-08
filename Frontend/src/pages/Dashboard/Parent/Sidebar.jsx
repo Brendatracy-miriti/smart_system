@@ -1,83 +1,36 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate, Outlet } from "react-router-dom";
-import { Home, BarChart3, Bus, MessageSquare, CreditCard, Settings, LogOut, Menu, X } from "lucide-react";
-import { useTheme } from "../../../hooks/useTheme";
+import { NavLink, Outlet } from "react-router-dom";
+import { useTheme } from "../../../context/ThemeContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ParentSidebar() {
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
+  const [open, setOpen] = useState(true);
   const { theme, toggleTheme } = useTheme();
-
-  const handleLogout = () => {
-    localStorage.removeItem("smartedu_user");
-    navigate("/login");
-  };
-
+  const { logout } = useAuth();
   const links = [
-    { to: "/parent", icon: <Home size={18} />, label: "Dashboard" },
-    { to: "/parent/performance", icon: <BarChart3 size={18} />, label: "Performance" },
-    { to: "/parent/transport", icon: <Bus size={18} />, label: "Transport" },
-    { to: "/parent/messages", icon: <MessageSquare size={18} />, label: "Messages" },
-    { to: "/parent/payments", icon: <CreditCard size={18} />, label: "Payments" },
-    { to: "/parent/settings", icon: <Settings size={18} />, label: "Settings" },
+    { to: "/parent", label: "Dashboard" },
+    { to: "/parent/transport", label: "Transport" },
+    { to: "/parent/messages", label: "Messages" },
+    { to: "/parent/settings", label: "Settings" },
   ];
 
   return (
     <div className="flex min-h-screen">
-      {/* Mobile toggle */}
-      <button onClick={() => setOpen(!open)} className="lg:hidden fixed top-4 left-4 z-50 bg-primary text-white p-2 rounded-lg">
-        {open ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      <aside className={`${open ? "w-64" : "w-20"} bg-white dark:bg-[#1F2937] p-4`}>
+        <button onClick={()=>setOpen(!open)} className="mb-4 text-gray-500">{open ? "◀" : "▶"}</button>
+        <nav className="space-y-2">
+          {links.map(l=> <NavLink key={l.to} to={l.to} className={({isActive})=>`block px-3 py-2 rounded ${isActive ? "bg-primary text-white" : "text-gray-600"}`}>{open ? l.label : l.label.charAt(0)}</NavLink>)}
+        </nav>
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed lg:static top-0 left-0 h-full w-64 bg-white dark:bg-[#111827] shadow-xl p-5 flex flex-col justify-between transition-transform duration-300 z-40 ${
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
-      >
-        <div>
-          <h2 className="text-xl font-bold text-primary mb-6">Edu-Guardian</h2>
-          <nav className="flex flex-col gap-2">
-            {links.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-lg ${
-                    isActive
-                      ? "bg-primary text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
-                  }`
-                }
-              >
-                {link.icon}
-                <span>{link.label}</span>
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-
-        <div className="mt-8 flex flex-col gap-3">
-          <button
-            onClick={toggleTheme}
-            className="py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm"
-          >
-            Toggle {theme === "dark" ? "Light" : "Dark"} Mode
-          </button>
-          <button
-            onClick={handleLogout}
-            className="py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2"
-          >
-            <LogOut size={16} /> Logout
-          </button>
+        <div className="mt-auto space-y-2">
+          <button onClick={toggleTheme} className="w-full py-2">{theme === "dark" ? "Light" : "Dark"}</button>
+          <button onClick={()=>{ logout(); window.location.href="/login"; }} className="w-full py-2 text-red-500">Logout</button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-0 p-6 bg-gray-50 dark:bg-gray-950 overflow-y-auto">
+      <main className="flex-1 p-6 overflow-y-auto">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 }

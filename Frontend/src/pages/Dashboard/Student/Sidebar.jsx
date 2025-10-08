@@ -1,70 +1,85 @@
 import React, { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, BookOpen, ClipboardList, BarChart2, Calendar, MessageCircle, Settings, LogOut } from "lucide-react";
+import { NavLink, Outlet } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Sun, Moon, LogOut, Home, BookOpen, Award, Calendar, Settings } from "lucide-react";
+import { useTheme } from "../../../context/ThemeContext";
 
 export default function StudentSidebar() {
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("smartedu_user");
-    navigate("/login");
-  };
+  const [open, setOpen] = useState(true);
+  const { theme, toggleTheme } = useTheme();
 
   const links = [
-    { name: "Dashboard", path: "/student", icon: Home },
-    { name: "Courses", path: "/student/courses", icon: BookOpen },
-    { name: "Assignments", path: "/student/assignments", icon: ClipboardList },
-    { name: "Grades", path: "/student/grades", icon: BarChart2 },
-    { name: "Timetable", path: "/student/timetable", icon: Calendar },
-    { name: "Messages", path: "/student/messages", icon: MessageCircle },
-    { name: "Settings", path: "/student/settings", icon: Settings },
+    { to: "/student", label: "Dashboard", icon: Home },
+    { to: "/student/assignments", label: "Assignments", icon: BookOpen },
+    { to: "/student/grades", label: "Grades", icon: Award },
+    { to: "/student/timetable", label: "Timetable", icon: Calendar },
+    { to: "/student/settings", label: "Settings", icon: Settings },
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-[#0D1117]">
       {/* Sidebar */}
-      <div className={`bg-white dark:bg-gray-900 p-5 border-r border-gray-200 dark:border-gray-700 
-        ${open ? "w-64" : "w-20"} transition-all duration-300 flex flex-col`}>
-        
-        <div className="flex items-center justify-between mb-8">
-          <h1 className={`text-lg font-bold text-blue-600 transition-all ${!open && "hidden"}`}>
-            Edu-Guardian
-          </h1>
-          <button onClick={() => setOpen(!open)} className="p-2 text-gray-600 dark:text-gray-300">
-            ☰
+      <motion.aside
+        initial={{ x: -50, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className={`${
+          open ? "w-64" : "w-20"
+        } bg-white dark:bg-[#1F2937] p-4 shadow-lg flex flex-col justify-between transition-all`}
+      >
+        <div>
+          <button
+            onClick={() => setOpen(!open)}
+            className="text-gray-500 dark:text-gray-300 mb-6"
+          >
+            {open ? "◀" : "▶"}
           </button>
+          <nav className="space-y-2">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive
+                      ? "bg-primary text-white"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`
+                }
+              >
+                {open ? link.label : <link.icon size={18} />}
+              </NavLink>
+            ))}
+          </nav>
         </div>
 
-        <nav className="flex-1 space-y-2">
-          {links.map(({ name, path, icon: Icon }) => (
-            <NavLink
-              key={name}
-              to={path}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 
-                 ${isActive ? "bg-blue-100 text-blue-700 dark:bg-gray-800" : "text-gray-700 dark:text-gray-300"}`
-              }
-            >
-              <Icon size={18} />
-              {open && <span className="text-sm font-medium">{name}</span>}
-            </NavLink>
-          ))}
-        </nav>
+        <div className="space-y-3">
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300"
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            {open && (theme === "dark" ? "Light Mode" : "Dark Mode")}
+          </button>
 
-        <button
-          onClick={handleLogout}
-          className="mt-auto flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-gray-800"
-        >
-          <LogOut size={18} />
-          {open && <span className="text-sm font-medium">Logout</span>}
-        </button>
-      </div>
+          <button
+            onClick={() => {
+              localStorage.removeItem("currentUser");
+              window.location.href = "/login";
+            }}
+            className="w-full flex items-center justify-center gap-2 text-red-500 hover:text-red-600"
+          >
+            <LogOut size={18} />
+            {open && "Logout"}
+          </button>
+        </div>
+      </motion.aside>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-950 overflow-y-auto">
+      <main className="flex-1 p-6 overflow-y-auto">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 }

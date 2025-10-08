@@ -1,51 +1,45 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { useMessage } from "../../../hooks/useMessage";
+import { useAuth } from "../../../context/AuthContext";
+import { useMessage } from "../../../context/MessageContext";
 
-export default function Settings() {
-  const [theme, setTheme] = useState("light");
-  const [notifications, setNotifications] = useState(true);
+export default function StudentSettings() {
+  const { current, updateAvatar } = useAuth();
   const { setMessage } = useMessage();
+  const [preview, setPreview] = useState(current?.avatarBase64 || null);
 
-  const handleSave = () => {
-    setMessage({ type: "success", text: "Settings saved successfully!" });
+  const fileToBase64 = (file) => new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+
+  const handlePhoto = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const b = await fileToBase64(file);
+    updateAvatar(b);
+    setPreview(b);
+    setMessage({ type: "success", text: "Profile photo updated" });
+    setTimeout(()=>window.dispatchEvent(new Event("storage")), 200);
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-      <h2 className="text-2xl font-bold text-blue-600 mb-4">Settings</h2>
-
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">
-            Theme
-          </label>
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            className="p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
-          >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
+    <div className="p-4">
+      <h2 className="text-2xl font-bold text-primary mb-4">Settings</h2>
+      <div className="bg-white dark:bg-[#071027] p-4 rounded-xl">
+        <div className="flex items-center gap-4">
+          <img src={preview || current?.avatarBase64 || "https://i.pravatar.cc/100"} className="w-20 h-20 rounded-full" alt="avatar" />
+          <div>
+            <div className="font-semibold">{current?.name}</div>
+            <div className="text-xs text-gray-500">{current?.email}</div>
+          </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={notifications}
-            onChange={() => setNotifications(!notifications)}
-          />
-          <label className="text-gray-800 dark:text-gray-200">Enable Notifications</label>
+        <div className="mt-3">
+          <label className="block text-sm mb-1">Change profile photo</label>
+          <input type="file" accept="image/*" onChange={handlePhoto} />
         </div>
-
-        <button
-          onClick={handleSave}
-          className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-        >
-          Save Changes
-        </button>
       </div>
-    </motion.div>
+    </div>
   );
 }

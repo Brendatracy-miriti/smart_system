@@ -1,14 +1,15 @@
 import React from "react";
 
 export default function MiniCard({ title, description, icon: Icon, color = "blue" }) {
+  // keep styling similar to your theme
   return (
-    <div className={`flex items-center p-4 rounded-xl bg-${color}-50 dark:bg-gray-800 shadow-sm`}>
-      <div className={`p-2 rounded-full bg-${color}-100 text-${color}-600`}>
-        <Icon size={20} />
+    <div className="bg-white dark:bg-[#0B1221] p-4 rounded-xl shadow flex items-center gap-4">
+      <div className="p-2 rounded-full bg-blue-50">
+        {Icon ? <Icon size={20} /> : null}
       </div>
-      <div className="ml-3">
-        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{title}</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+      <div>
+        <div className="text-sm font-semibold text-gray-800 dark:text-gray-100">{title}</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400">{description}</div>
       </div>
     </div>
   );

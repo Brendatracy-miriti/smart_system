@@ -1,53 +1,59 @@
 import React, { createContext, useContext, useState } from "react";
-import { DataContext } from "./DataContext";
+import { v4 as uuidv4 } from "uuid";
+import {
+  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser
+} from "../utils/localData";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const { createUser, findUserByEmail, createStudentProfile, createParentProfile, createTeacherProfile } = useContext(DataContext);
   const [current, setCurrent] = useState(() => {
     try {
-      const raw = localStorage.getItem("eduguardian_auth");
-      return raw ? JSON.parse(raw) : null;
+      return JSON.parse(localStorage.getItem("eg_current_user") || "null");
     } catch { return null; }
   });
 
-  const signup = async ({ name, email, password, role, extra }) => {
-    // extra contains role specific fields (course, admission, childStudentId, courses for teacher)
-    if (findUserByEmail(email)) throw new Error("Email already in use");
-    const user = createUser({ name, email, password, role, avatarBase64: extra?.avatar || null });
+  const signup = async ({ name, email, password, role, extra = {} }) => {
+    if (findUserByEmail(email)) throw new Error("Email already taken");
+    const user = { id: uuidv4(), name, email, password, role, avatarBase64: extra.avatar || null };
+    addUser(user);
     // create role profile
     if (role === "student") {
-      const student = createStudentProfile({ userId: user.id, admission_number: extra.admission, course: extra.course });
-      // optionally create class mapping later
+      addStudent({ id: uuidv4(), userId: user.id, admission_number: extra.admission || "", course: extra.course || "", attendance_rate: 0, average_score: 0, courses_count: extra.course ? 1 : 0, completed_assignments: 0, gpa: null, email });
     } else if (role === "parent") {
-      createParentProfile({ userId: user.id, childStudentId: extra.childStudentId });
+      addParent({ id: uuidv4(), userId: user.id, childStudentId: extra.childStudentId || null, email });
     } else if (role === "teacher") {
-      createTeacherProfile({ userId: user.id, courses: extra.courses || [] });
+      addTeacher({ id: uuidv4(), userId: user.id, courses: extra.courses || [], email });
     }
-
-    // auto-login
+    localStorage.setItem("eg_current_user", JSON.stringify(user));
     setCurrent(user);
-    localStorage.setItem("eduguardian_auth", JSON.stringify(user));
     return user;
   };
 
   const login = async ({ email, password }) => {
-    const user = findUserByEmail(email);
-    if (!user) throw new Error("User not found");
-    if (user.password !== password) throw new Error("Invalid password");
-    setCurrent(user);
-    localStorage.setItem("eduguardian_auth", JSON.stringify(user));
-    return user;
+    const u = findUserByEmail(email);
+    if (!u) throw new Error("No account for this email");
+    if (u.password !== password) throw new Error("Invalid password");
+    localStorage.setItem("eg_current_user", JSON.stringify(u));
+    setCurrent(u);
+    return u;
   };
 
   const logout = () => {
+    localStorage.removeItem("eg_current_user");
     setCurrent(null);
-    localStorage.removeItem("eduguardian_auth");
+  };
+
+  const updateAvatar = (base64) => {
+    if (!current) return;
+    updateUser(current.id, { avatarBase64: base64 });
+    const updated = { ...current, avatarBase64: base64 };
+    localStorage.setItem("eg_current_user", JSON.stringify(updated));
+    setCurrent(updated);
   };
 
   return (
-    <AuthContext.Provider value={{ current, signup, login, logout }}>
+    <AuthContext.Provider value={{ current, signup, login, logout, updateAvatar }}>
       {children}
     </AuthContext.Provider>
   );
