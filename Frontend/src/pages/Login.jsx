@@ -8,7 +8,7 @@ export default function Login() {
   const { login } = useAuth();
   const { setMessage } = useMessage();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await login(username.trim(), password.trim());
+      await login({ email: email.trim(), password: password.trim() });
     } catch {
       setMessage({ type: "error", text: "Login failed, please try again." });
     } finally {
@@ -78,14 +78,14 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Username</label>
+              <label className="block text-sm font-medium mb-1">Email</label>
               <input
-                type="text"
+                type="email"
                 required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent"
-                placeholder="e.g. Admin"
+                placeholder="e.g. admin@example.com"
               />
             </div>
 

@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
-  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser
+  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser, ensureAdmin
 } from "../utils/localData";
 
 export const AuthContext = createContext();
@@ -12,6 +12,11 @@ export function AuthProvider({ children }) {
       return JSON.parse(localStorage.getItem("eg_current_user") || "null");
     } catch { return null; }
   });
+
+  useEffect(() => {
+    // Seed default admin user if none exists
+    ensureAdmin({ id: uuidv4(), name: "Admin", email: "Admin", password: "AdminSystem", role: "admin", avatarBase64: null });
+  }, []);
 
   const signup = async ({ name, email, password, role, extra = {} }) => {
     if (findUserByEmail(email)) throw new Error("Email already taken");

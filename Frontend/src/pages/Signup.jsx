@@ -15,6 +15,9 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   // role fields
   const [admission, setAdmission] = useState("");
   const [course, setCourse] = useState("");
@@ -23,6 +26,10 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setMessage({ type: "error", text: "Passwords do not match" });
+      return;
+    }
     try {
       const extra = {};
       if (role === "student") { extra.admission_number = admission; extra.course = course; }
@@ -30,6 +37,7 @@ export default function Signup() {
       if (role === "teacher") { extra.courses = teacherCourses.split(",").map(s => s.trim()).filter(Boolean); }
       await signup({ name, email, password, role, extra });
       setMessage({ type: "success", text: "Signup success!" });
+      if (role === "admin") navigate("/admin");
       if (role === "teacher") navigate("/teacher");
       if (role === "parent") navigate("/parent");
       if (role === "student") navigate("/student");
@@ -95,6 +103,7 @@ export default function Signup() {
                 <option value="student">Student</option>
                 <option value="parent">Parent</option>
                 <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
 
@@ -110,7 +119,44 @@ export default function Signup() {
 
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
-              <input required value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Your password" className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent" />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent pr-10"
+                  placeholder="Your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Confirm Password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent pr-10"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showConfirmPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
             </div>
 
             {/* role specific */}
