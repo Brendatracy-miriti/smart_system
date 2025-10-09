@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'alerts',
+    'transport',
 ]
 
 MIDDLEWARE = [
@@ -162,3 +163,5 @@ cloudinary.config(
     api_key = config('CLOUDINARY_API_KEY'),
     api_secret = config('CLOUDINARY_API_SECRET')
 )
+
+GOOGLE_MAPS_API_KEY = config('GOOGLE_MAPS_API_KEY', default='')
