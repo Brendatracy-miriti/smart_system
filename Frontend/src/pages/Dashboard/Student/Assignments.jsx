@@ -1,49 +1,72 @@
-import React, { useEffect, useState } from "react";
-import { useLive } from "../../../context/LiveContext";
-import { addSubmission, getAssignments, getSubmissions, addSubmission as addSub } from "../../../utils/localData";
-import { v4 as uuidv4 } from "uuid";
+import React, { useState } from "react";
+import { useData } from "../../../context/DataContext";
 import { useMessage } from "../../../context/MessageContext";
 
 export default function StudentAssignments() {
-  const { assignments, submissions, refresh } = useLive();
+  const { data, addSubmission, refresh } = useData();
   const { setMessage } = useMessage();
-  const user = JSON.parse(localStorage.getItem("eg_current_user"));
-  const [myAssignments, setMyAssignments] = useState([]);
+  const student = JSON.parse(localStorage.getItem("eg_current_user") || "null");
+  const [answer, setAnswer] = useState("");
+  const [selected, setSelected] = useState(null);
 
-  useEffect(() => {
-    if (!user) return;
-    setMyAssignments(assignments.filter(a => a.course === user.course));
-  }, [assignments]);
-
-  const handleSubmit = (assignmentId) => {
-    if (!user) return setMessage({ type: "error", text: "Login first" });
-    const sub = { id: uuidv4(), assignmentId, studentId: user.id, userEmail: user.email, content: "Submitted via frontend", submittedAt: new Date().toISOString(), grade: null };
-    addSub(sub);
-    setMessage({ type: "success", text: "Submitted" });
-    // force refresh by updating localStorage key
-    window.dispatchEvent(new Event("storage"));
-    setTimeout(() => refresh && refresh(), 300);
+  const submit = () => {
+    if (!selected) return setMessage({ type: "error", text: "Select assignment" });
+    const sub = {
+      id: Date.now(),
+      studentId: student.id,
+      assignmentId: selected.id,
+      answer,
+      submittedAt: new Date().toISOString(),
+      grade: null,
+    };
+    addSubmission(sub);
+    refresh();
+    setAnswer("");
+    setSelected(null);
+    setMessage({ type: "success", text: "Submission sent" });
   };
 
   return (
-    <div className="space-y-4 p-4">
-      <h2 className="text-2xl font-bold text-primary">Assignments</h2>
-      {myAssignments.length ? myAssignments.map(a => {
-        const sub = submissions.find(s => s.assignmentId === a.id && s.userEmail === user.email);
-        return (
-          <div key={a.id} className="bg-white dark:bg-[#071027] p-4 rounded-xl">
-            <div className="flex justify-between">
-              <div>
-                <div className="font-semibold">{a.title}</div>
-                <div className="text-xs text-gray-500">{a.createdAt}</div>
-              </div>
-              <div>
-                {sub ? <div className="text-sm text-green-500">Submitted</div> : <button onClick={()=>handleSubmit(a.id)} className="px-3 py-1 bg-primary text-white rounded">Submit</button>}
-              </div>
-            </div>
+    <div className="p-4 space-y-4">
+      <h2 className="text-2xl font-bold text-primary">My Assignments</h2>
+
+      <div className="grid gap-3">
+        {data.assignments.map((a) => (
+          <div
+            key={a.id}
+            className={`p-3 rounded shadow cursor-pointer ${
+              selected?.id === a.id
+                ? "bg-blue-50 dark:bg-blue-900/40"
+                : "bg-white dark:bg-[#071027]"
+            }`}
+            onClick={() => setSelected(a)}
+          >
+            <h3 className="font-semibold">{a.title}</h3>
+            <p className="text-sm">{a.description}</p>
+            <p className="text-xs text-gray-400">
+              Deadline: {a.deadline || "N/A"}
+            </p>
           </div>
-        );
-      }) : <div className="text-gray-500">No assignments yet.</div>}
+        ))}
+      </div>
+
+      {selected && (
+        <div className="bg-white dark:bg-[#071027] p-4 rounded-xl shadow space-y-3">
+          <h3 className="font-semibold">{selected.title}</h3>
+          <textarea
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="Write your answer…"
+            className="w-full p-2 border rounded"
+          />
+          <button
+            onClick={submit}
+            className="bg-primary text-white px-4 py-2 rounded"
+          >
+            Submit
+          </button>
+        </div>
+      )}
     </div>
   );
 }

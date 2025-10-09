@@ -1,15 +1,11 @@
 import React from "react";
 
-export default function MiniCard({ title, description, icon: Icon, color = "blue" }) {
-  // keep styling similar to your theme
+export default function MessageCard({ from, content, time }) {
   return (
-    <div className="bg-white dark:bg-[#0B1221] p-4 rounded-xl shadow flex items-center gap-4">
-      <div className="p-2 rounded-full bg-blue-50">
-        {Icon ? <Icon size={20} /> : null}
-      </div>
-      <div>
-        <div className="text-sm font-semibold text-gray-800 dark:text-gray-100">{title}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{description}</div>
+    <div className="p-3 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg">
+      <p className="text-sm text-gray-700 dark:text-gray-200">{content}</p>
+      <div className="text-xs text-gray-500 mt-2">
+        From: {from} • {time}
       </div>
     </div>
   );

@@ -1,64 +1,32 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  getUsers,
-  getStudents,
-  getTeachers,
-  getParents,
-  getAssignments,
-  getSubmissions,
-  getAttendance,
-  getTimetables,
-  getTransport,
-  getNotifications,
-  getGrades,
-} from "../utils/localData";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
+// Central live data store using localStorage — replaces backend API calls
 const LiveContext = createContext();
 
-export function LiveProvider({ children }) {
-  const [users, setUsers] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [parents, setParents] = useState([]);
-  const [assignments, setAssignments] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
-  const [attendance, setAttendance] = useState([]);
-  const [timetables, setTimetables] = useState([]);
-  const [transport, setTransport] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [grades, setGrades] = useState([]);
-
-  const refresh = () => {
-    setUsers(getUsers());
-    setStudents(getStudents());
-    setTeachers(getTeachers());
-    setParents(getParents());
-    setAssignments(getAssignments());
-    setSubmissions(getSubmissions());
-    setAttendance(getAttendance());
-    setTimetables(getTimetables());
-    setTransport(getTransport());
-    setNotifications(getNotifications());
-    setGrades(getGrades());
-  };
+export const LiveProvider = ({ children }) => {
+  const [data, setData] = useState({
+    users: JSON.parse(localStorage.getItem("users")) || [],
+    assignments: JSON.parse(localStorage.getItem("assignments")) || [],
+    grades: JSON.parse(localStorage.getItem("grades")) || [],
+    attendance: JSON.parse(localStorage.getItem("attendance")) || [],
+    timetable: JSON.parse(localStorage.getItem("timetable")) || [],
+    messages: JSON.parse(localStorage.getItem("messages")) || [],
+  });
 
   useEffect(() => {
-    refresh();
-    // also listen to storage events (other tabs)
-    const onStorage = (e) => {
-      if (e.key && e.key.startsWith("eg_")) refresh();
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+    localStorage.setItem("users", JSON.stringify(data.users));
+    localStorage.setItem("assignments", JSON.stringify(data.assignments));
+    localStorage.setItem("grades", JSON.stringify(data.grades));
+    localStorage.setItem("attendance", JSON.stringify(data.attendance));
+    localStorage.setItem("timetable", JSON.stringify(data.timetable));
+    localStorage.setItem("messages", JSON.stringify(data.messages));
+  }, [data]);
 
   return (
-    <LiveContext.Provider value={{
-      users, students, teachers, parents, assignments, submissions, attendance, timetables, transport, notifications, grades, refresh
-    }}>
+    <LiveContext.Provider value={{ data, setData }}>
       {children}
     </LiveContext.Provider>
   );
-}
+};
 
 export const useLive = () => useContext(LiveContext);
