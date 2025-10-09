@@ -188,3 +188,34 @@ export const DataProvider = ({ children }) => {
     </DataContext.Provider>
   );
 };
+
+// inside DataContext
+const [students, setStudents] = useState([]);
+
+const calculateRisk = (student) => {
+  const attendanceRisk = 100 - (student.attendanceRate || 0);
+  const gradeRisk = 70 - (student.avgScore || 0);
+  const score = (attendanceRisk * 0.5) + (gradeRisk * 0.5);
+  return score > 25 ? "At-Risk" : "Safe";
+};
+
+const getAtRiskStudents = () => {
+  return students
+    .map((s) => ({ ...s, risk: calculateRisk(s) }))
+    .filter((s) => s.risk === "At-Risk");
+};
+
+return (
+  <DataContext.Provider
+    value={{
+      data,
+      updateUser,
+      students,
+      setStudents,
+      calculateRisk,
+      getAtRiskStudents,
+    }}
+  >
+    {children}
+  </DataContext.Provider>
+);

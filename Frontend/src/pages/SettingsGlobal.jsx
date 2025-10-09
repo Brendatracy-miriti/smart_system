@@ -1,4 +1,3 @@
-// Shared settings UI you can import/use in each role's Settings page
 import React, { useContext, useState } from "react";
 import { DataContext } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";

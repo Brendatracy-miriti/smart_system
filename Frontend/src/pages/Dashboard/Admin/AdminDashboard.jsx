@@ -5,6 +5,16 @@ import StatCard from "../../../ui/StatCard";
 import FundChart from "../../../ui/FundChart";
 import api from "../../../utils/api";
 import { useMessage } from "../../../hooks/useMessage";
+
+import { AlertTriangle } from "lucide-react";
+import { useContext } from "react";
+import { DataContext } from "../../../context/DataContext";
+
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { useContext, useMemo } from "react";
+import { DataContext } from "../../../context/DataContext";
+import { PieChart as PieChartIcon } from "lucide-react";
+
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({
@@ -13,6 +23,10 @@ export default function AdminDashboard() {
     buses: 0,
     fundsTotal: 0,
   });
+
+  const { getAtRiskStudents } = useContext(DataContext);
+  const atRisk = getAtRiskStudents();
+
   const [trendData, setTrendData] = useState([]); // [{month:'Jan', income:100, expense:50}]
   const { setMessage } = useMessage();
 
@@ -79,6 +93,21 @@ export default function AdminDashboard() {
     };
   }, [setMessage]);
 
+  const { students, calculateRisk } = useContext(DataContext);
+
+// group by course
+const riskByCourse = useMemo(() => {
+  const map = {};
+  students.forEach((s) => {
+    const course = s.course || "Unknown";
+    const risk = calculateRisk(s);
+    if (!map[course]) map[course] = { course, safe: 0, risk: 0 };
+    if (risk === "At-Risk") map[course].risk += 1;
+    else map[course].safe += 1;
+  });
+  return Object.values(map);
+}, [students, calculateRisk]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -125,6 +154,75 @@ export default function AdminDashboard() {
             color="emerald-500"
           />
         </div>
+
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-gray-500 dark:text-gray-400 text-sm">
+            Total Students: <span className="font-semibold">{students.length}</span>
+          </div>
+          <div className="text-gray-500 dark:text-gray-400 text-sm">
+            At-Risk: <span className="text-red-500 font-semibold">
+              {students.filter(s => calculateRisk(s) === "At-Risk").length}
+            </span>
+          </div>
+        </div>
+
+
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-red-600">
+          <AlertTriangle size={20} /> At-Risk Students
+        </h3>
+        {atRisk.length ? (
+          <table className="mt-3 w-full text-sm">
+            <thead>
+              <tr className="text-gray-500 dark:text-gray-400">
+                <th className="text-left py-1">Name</th>
+                <th className="text-left py-1">Course</th>
+                <th className="text-left py-1">Attendance</th>
+                <th className="text-left py-1">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {atRisk.map((s) => (
+                <tr key={s.id} className="border-t border-gray-100 dark:border-gray-800">
+                  <td className="py-1">{s.name}</td>
+                  <td>{s.course}</td>
+                  <td>{s.attendanceRate}%</td>
+                  <td>{s.avgScore}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-gray-500 mt-2">No at-risk students detected.</p>
+        )}
+      </div>;
+
+      <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow mt-6">
+      <h3 className="text-lg font-semibold flex items-center gap-2 mb-4 text-primary">
+        <PieChartIcon size={20} /> Student Risk Analytics
+      </h3>
+      {riskByCourse.length ? (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={riskByCourse}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="course" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#1F2937",
+                borderRadius: "0.5rem",
+                color: "#f3f4f6",
+              }}
+            />
+            <Bar dataKey="safe" stackId="a" fill="#10B981" name="Safe Students" />
+            <Bar dataKey="risk" stackId="a" fill="#EF4444" name="At-Risk Students" />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <p className="text-gray-500">No student data available for analytics.</p>
+      )}
+    </div>
+
 
         {/* Middle Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

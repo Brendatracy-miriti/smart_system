@@ -1,6 +1,10 @@
 import React from "react";
 import { useLive } from "../../../context/LiveContext";
 
+import { useContext } from "react";
+import { DataContext } from "../../../context/DataContext";
+import { AlertTriangle, ShieldCheck } from "lucide-react";
+
 export default function ParentDashboard() {
   const { parents, students, assignments, timetables, attendance, grades } = useLive();
   const user = JSON.parse(localStorage.getItem("eg_current_user"));
@@ -12,6 +16,9 @@ export default function ParentDashboard() {
   const childAssignments = assignments.filter(a => a.course === child?.course);
   const childGrades = grades.filter(g => g.studentEmail === child?.email);
   const childAttendance = attendance.filter(a => a.studentId === child?.id);
+
+  const { calculateRisk } = useContext(DataContext);
+  const risk = child ? calculateRisk(child) : "Unknown";
 
   return (
     <div className="p-4">
@@ -36,6 +43,18 @@ export default function ParentDashboard() {
         <h3 className="font-semibold">Recent Grades</h3>
         {childGrades.length ? childGrades.map(g=> <div key={g.id} className="py-2 border-b">{g.course} — {g.score}</div>) : <div className="text-gray-500">No grades yet.</div>}
       </div>
+      <div className="mt-4 p-3 rounded-xl border dark:border-gray-700">
+      <h4 className="font-semibold text-gray-700 dark:text-gray-200">Risk Status</h4>
+      {risk === "At-Risk" ? (
+        <p className="flex items-center gap-2 text-red-600 mt-2">
+          <AlertTriangle size={18} /> Your child might be struggling. Please contact their teacher.
+        </p>
+      ) : (
+        <p className="flex items-center gap-2 text-green-600 mt-2">
+          <ShieldCheck size={18} /> Your child is performing well.
+        </p>
+      )}
+    </div>;
     </div>
   );
 }

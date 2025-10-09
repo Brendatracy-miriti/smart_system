@@ -5,11 +5,20 @@ import { useMessage } from "../../../hooks/useMessage";
 import MiniChart from "../../../ui/MiniChart";
 import StatCard from "../../../ui/StatCard";
 
+import { useContext } from "react";
+import { DataContext } from "../../../context/DataContext";
+import { AlertTriangle } from "lucide-react";
+
 export default function TeacherDashboard() {
   const [loading, setLoading] = useState(true);
   const [classes, setClasses] = useState([]);
   const [performance, setPerformance] = useState([]);
   const { setMessage } = useMessage();
+
+  const { students, calculateRisk } = useContext(DataContext);
+  const myAtRisk = students.filter(
+    (s) => s.teacherId === currentUser.id && calculateRisk(s) === "At-Risk"
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -52,6 +61,23 @@ export default function TeacherDashboard() {
         <StatCard title="Average Attendance" value="91%" color="green-500" />
         <StatCard title="Active Assignments" value="6" color="cyan-500" />
       </div>
+
+      <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow mt-6">
+      <h3 className="text-lg font-semibold flex items-center gap-2 text-red-600">
+        <AlertTriangle size={20} /> Your At-Risk Students
+      </h3>
+      {myAtRisk.length ? (
+        <ul className="mt-3 space-y-2 text-sm">
+          {myAtRisk.map((s) => (
+            <li key={s.id} className="border-b border-gray-100 dark:border-gray-800 pb-1">
+              {s.name} — {s.course} ({s.attendanceRate}% attendance, {s.avgScore} avg)
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-500">No at-risk students in your classes.</p>
+      )}
+    </div>;
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white dark:bg-[#1F2937] p-5 rounded-2xl shadow-sm">
