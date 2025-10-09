@@ -6,14 +6,10 @@ import FundChart from "../../../ui/FundChart";
 import api from "../../../utils/api";
 import { useMessage } from "../../../hooks/useMessage";
 
-import { AlertTriangle } from "lucide-react";
-import { useContext } from "react";
-import { DataContext } from "../../../context/DataContext";
-
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { AlertTriangle, PieChart as PieChartIcon } from "lucide-react";
 import { useContext, useMemo } from "react";
 import { DataContext } from "../../../context/DataContext";
-import { PieChart as PieChartIcon } from "lucide-react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
