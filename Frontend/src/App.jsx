@@ -73,7 +73,7 @@ function AnimatedRoutes() {
           <Route path="performance" element={<TeacherPerformance />} />
           <Route path="messages" element={<TeacherMessages />} />
           <Route path="timetable" element={<Timetable />} />
-          <Route path="/teacher/mentorship-requests" element={<MentorshipRequests />} />
+          <Route path="mentorship-requests" element={<MentorshipRequests />} />
           <Route path="settings" element={<TeacherSettings />} />
         </Route>
 

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useMessage } from "../hooks/useMessage";
-import loginIllustration from "../assets/react.svg";
+import loginIllustration from "../assets/login-signup illustration.svg";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function Login() {

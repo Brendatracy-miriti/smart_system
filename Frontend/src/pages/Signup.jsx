@@ -158,7 +158,7 @@ export default function Signup() {
         transition={{ duration: 0.7 }}
         className="w-full md:w-2/5 flex items-center justify-center bg-[#0f172a] text-white"
       >
-        <div className="max-w-md w-full mx-auto px-10">
+        <div className="max-w-md w-full mx-auto px-10 h-screen overflow-y-auto">
           <h1 className="text-3xl font-bold mb-2 text-center">Create Account</h1>
           <p className="text-gray-400 mb-8 text-center">
             Fill in your details to get started
