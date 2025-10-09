@@ -1,119 +1,107 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { PlusCircle, Download, BarChart3 } from "lucide-react";
-import { useMessage } from "../../../context/MessageContext";
 import { useData } from "../../../context/DataContext";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+
+const COLORS = ["#10B981", "#38BDF8", "#1E3A8A", "#F59E0B", "#EF4444"];
 
 export default function Funds() {
-  const { funds, addFund } = useData();
-  const { setMessage } = useMessage();
+  const { data, addFund } = useData();
+  const funds = data.funds || [];
+  const [form, setForm] = useState({ source: "", amount: "", note: "" });
 
-  const [amount, setAmount] = useState("");
-  const [source, setSource] = useState("");
-  const [note, setNote] = useState("");
+  const total = useMemo(() => funds.reduce((s, f) => s + (Number(f.amount) || 0), 0), [funds]);
 
-  const handleAddFund = (e) => {
-    e.preventDefault();
-    if (!amount || !source) {
-      setMessage({ type: "error", text: "Please fill all required fields" });
-      return;
-    }
-    addFund({
-      id: Date.now(),
-      source,
-      note,
-      amount: parseFloat(amount),
-      date: new Date().toISOString(),
+  const bySource = useMemo(() => {
+    const map = {};
+    funds.forEach((f) => {
+      map[f.source] = (map[f.source] || 0) + (Number(f.amount) || 0);
     });
-    setMessage({ type: "success", text: "Fund added successfully" });
-    setAmount("");
-    setSource("");
-    setNote("");
+    return Object.entries(map).map(([key, value]) => ({ name: key, value }));
+  }, [funds]);
+
+  const monthly = useMemo(() => {
+    const m = {};
+    funds.forEach((f) => {
+      const d = new Date(f.date || f.createdAt || f.timestamp || Date.now());
+      const label = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      m[label] = (m[label] || 0) + (Number(f.amount) || 0);
+    });
+    return Object.entries(m).map(([name, value]) => ({ name, value }));
+  }, [funds]);
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!form.source || !form.amount) return alert("Fill source and amount");
+    addFund({ id: Date.now(), source: form.source, amount: Number(form.amount), note: form.note, date: new Date().toISOString() });
+    setForm({ source: "", amount: "", note: "" });
   };
 
-  const total = funds.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="p-6 space-y-6"
-    >
-      <h2 className="text-2xl font-bold text-primary">Funds Management</h2>
-      <p className="text-gray-500 dark:text-gray-400">
-        Add, view and export school funds
-      </p>
-
-      {/* Total Summary */}
-      <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md flex justify-between items-center">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Total Funds</h3>
-          <p className="text-3xl font-bold text-emerald-500">
-            KSh {total.toLocaleString()}
-          </p>
+          <h2 className="text-2xl font-bold text-primary">Funds Management</h2>
+          <p className="text-gray-500 dark:text-gray-400">Track fund inflow and visualize where money comes from.</p>
         </div>
-        <BarChart3 size={42} className="text-emerald-400" />
+        <div className="text-right">
+          <div className="text-sm text-gray-500">Total</div>
+          <div className="text-2xl font-bold text-emerald-500">KSh {total.toLocaleString()}</div>
+        </div>
       </div>
 
-      {/* Add Fund Form */}
-      <form
-        onSubmit={handleAddFund}
-        className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow space-y-4"
-      >
-        <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
-          <PlusCircle size={18} /> Add Fund Record
-        </h3>
-        <div className="grid sm:grid-cols-3 gap-4">
-          <input
-            type="text"
-            placeholder="Source"
-            value={source}
-            onChange={(e) => setSource(e.target.value)}
-            className="p-3 border rounded-lg dark:border-gray-700 bg-transparent"
-          />
-          <input
-            type="number"
-            placeholder="Amount (KSh)"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="p-3 border rounded-lg dark:border-gray-700 bg-transparent"
-          />
-          <input
-            type="text"
-            placeholder="Note (optional)"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="p-3 border rounded-lg dark:border-gray-700 bg-transparent"
-          />
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="col-span-2 bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+          <h3 className="font-semibold mb-3">Monthly inflows</h3>
+          <div style={{ height: 240 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthly}>
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#1E3A8A" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-accent transition"
-        >
-          Add Fund
-        </button>
+
+        <div className="bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+          <h3 className="font-semibold mb-3">By source</h3>
+          <div style={{ height: 240 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={bySource} dataKey="value" nameKey="name" outerRadius={80} label>
+                  {bySource.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={submit} className="bg-white dark:bg-[#071027] p-4 rounded-2xl shadow space-y-3">
+        <div className="grid sm:grid-cols-3 gap-3">
+          <input placeholder="Source" value={form.source} onChange={(e) => setForm((p) => ({ ...p, source: e.target.value }))} className="p-2 border rounded bg-transparent" />
+          <input placeholder="Amount" value={form.amount} onChange={(e) => setForm((p) => ({ ...p, amount: e.target.value }))} className="p-2 border rounded bg-transparent" />
+          <input placeholder="Note (optional)" value={form.note} onChange={(e) => setForm((p) => ({ ...p, note: e.target.value }))} className="p-2 border rounded bg-transparent" />
+        </div>
+        <button type="submit" className="px-4 py-2 bg-primary text-white rounded">Add Fund</button>
       </form>
 
-      {/* List */}
-      <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold">Recent Transactions</h3>
-          <button className="flex items-center gap-2 text-sm border px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-            <Download size={14} /> Export CSV
-          </button>
-        </div>
+      <div className="bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+        <h3 className="font-semibold mb-2">Recent</h3>
         {funds.length ? (
-          <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-            {funds.map((f) => (
-              <li
-                key={f.id}
-                className="py-3 flex justify-between text-sm text-gray-600 dark:text-gray-300"
-              >
-                <span>{f.source}</span>
-                <span className="font-medium text-emerald-500">
-                  +KSh {f.amount.toLocaleString()}
-                </span>
+          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            {funds.slice().reverse().map((f) => (
+              <li key={f.id} className="py-2 flex justify-between">
+                <div>
+                  <div className="font-medium">{f.source}</div>
+                  <div className="text-sm text-gray-500">{f.note}</div>
+                </div>
+                <div className="text-emerald-500 font-semibold">KSh {Number(f.amount).toLocaleString()}</div>
               </li>
             ))}
           </ul>
