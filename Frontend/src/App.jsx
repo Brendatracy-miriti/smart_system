@@ -9,7 +9,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LiveProvider } from "./context/LiveContext";
 
-// Auth
+// Pages / Dashboards / Layouts
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
@@ -37,26 +37,27 @@ import ParentDashboard from "./pages/Dashboard/Parent/ParentDashboard";
 import ParentPerformance from "./pages/Dashboard/Parent/Performance";
 import ParentMessages from "./pages/Dashboard/Parent/Messages";
 import ParentSettings from "./pages/Dashboard/Parent/Settings";
-import Transport from "./pages/Transport/Transport"; // ✅ Google Maps Transport Page
+import Transport from "./pages/Transport/Transport";
 
 // Student
 import StudentDashboard from "./pages/Dashboard/Student/StudentDashboard";
 
-// UI
+// UI / Extras
 import ThemeToggle from "./ui/ThemeToggle";
+import MentorshipList from "./pages/Mentorship/MentorshipList";
+import MentorshipRequests from "./pages/Mentorship/MentorshipRequests";
 
 function AnimatedRoutes() {
   const location = useLocation();
-
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* ==================== AUTH ==================== */}
+        {/* Auth */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* ==================== ADMIN ==================== */}
+        {/* Admin */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<Users />} />
         <Route path="/admin/funds" element={<Funds />} />
@@ -64,7 +65,7 @@ function AnimatedRoutes() {
         <Route path="/admin/academic-insights" element={<AcademicInsights />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
 
-        {/* ==================== TEACHER ==================== */}
+        {/* Teacher */}
         <Route path="/teacher/*" element={<TeacherSidebar />}>
           <Route index element={<TeacherDashboard />} />
           <Route path="attendance" element={<Attendance />} />
@@ -72,20 +73,22 @@ function AnimatedRoutes() {
           <Route path="performance" element={<TeacherPerformance />} />
           <Route path="messages" element={<TeacherMessages />} />
           <Route path="timetable" element={<Timetable />} />
+          <Route path="/teacher/mentorship-requests" element={<MentorshipRequests />} />
           <Route path="settings" element={<TeacherSettings />} />
         </Route>
 
-        {/* ==================== PARENT ==================== */}
+        {/* Parent */}
         <Route path="/parent/*" element={<ParentSidebar />}>
           <Route index element={<ParentDashboard />} />
           <Route path="performance" element={<ParentPerformance />} />
           <Route path="messages" element={<ParentMessages />} />
-          <Route path="transport" element={<Transport />} /> {/* ✅ Google Map */}
+          <Route path="transport" element={<Transport />} />
           <Route path="settings" element={<ParentSettings />} />
         </Route>
 
-        {/* ==================== STUDENT ==================== */}
+        {/* Student */}
         <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/student/mentorship" element={<MentorshipList />} />
       </Routes>
     </AnimatePresence>
   );
@@ -100,7 +103,7 @@ export default function App() {
             <AuthProvider>
               <LiveProvider>
                 <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 relative">
-                  {/* 🔆 Universal Theme Toggle (top-right) */}
+                  {/* Theme toggle always visible */}
                   <div className="absolute top-4 right-4 z-50">
                     <ThemeToggle />
                   </div>

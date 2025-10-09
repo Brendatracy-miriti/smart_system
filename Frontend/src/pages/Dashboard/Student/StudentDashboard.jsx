@@ -112,6 +112,35 @@ export default function StudentDashboard() {
         <MiniCard title="Grades" description="Check term results" icon={BarChart2} color="green" />
         <MiniCard title="Timetable" description="See daily schedule" icon={Clock} color="purple" />
       </div>
+
+            {/* QUICK ACCESS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MiniCard
+          title="Assignments"
+          description="View pending work"
+          icon={ClipboardList}
+          color="blue"
+        />
+        <MiniCard
+          title="Grades"
+          description="Check term results"
+          icon={BarChart2}
+          color="green"
+        />
+        <MiniCard
+          title="Timetable"
+          description="See daily schedule"
+          icon={Clock}
+          color="purple"
+        />
+        <MiniCard
+          title="Find Mentor"
+          description="Connect with teachers"
+          icon={BookOpen}
+          color="emerald"
+          link="/student/mentorship"
+        />
+      </div>
     </motion.div>
   );
 }

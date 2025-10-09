@@ -1,138 +1,126 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import FundTable from "../../../ui/FundTable";
-import FundFormModal from "../../../ui/FundFormModal";
-import FundChart from "../../../ui/FundChart";
-import api from "../../../utils/api";
-import { useMessage } from "../../../hooks/useMessage";
+import { PlusCircle, Download, BarChart3 } from "lucide-react";
+import { useMessage } from "../../../context/MessageContext";
+import { useData } from "../../../context/DataContext";
 
 export default function Funds() {
-  const [funds, setFunds] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingFund, setEditingFund] = useState(null);
+  const { funds, addFund } = useData();
   const { setMessage } = useMessage();
 
-  const fetchFunds = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await api.get("funds/");
-      setFunds(res.data || []);
-    } catch {
-      setMessage({ type: "error", text: "Failed to fetch fund records." });
-    } finally {
-      setLoading(false);
-    }
-  }, [setMessage]);
+  const [amount, setAmount] = useState("");
+  const [source, setSource] = useState("");
+  const [note, setNote] = useState("");
 
-  const handleSave = async (data) => {
-    try {
-      if (editingFund) {
-        await api.put(`funds/${editingFund.id}/`, data);
-        setMessage({ type: "success", text: "Fund record updated!" });
-      } else {
-        await api.post("funds/", data);
-        setMessage({ type: "success", text: "Fund record added!" });
-      }
-      setShowModal(false);
-      setEditingFund(null);
-      fetchFunds();
-    } catch {
-      setMessage({ type: "error", text: "Failed to save fund record." });
+  const handleAddFund = (e) => {
+    e.preventDefault();
+    if (!amount || !source) {
+      setMessage({ type: "error", text: "Please fill all required fields" });
+      return;
     }
+    addFund({
+      id: Date.now(),
+      source,
+      note,
+      amount: parseFloat(amount),
+      date: new Date().toISOString(),
+    });
+    setMessage({ type: "success", text: "Fund added successfully" });
+    setAmount("");
+    setSource("");
+    setNote("");
   };
 
-  const handleDelete = async (fund) => {
-    if (!window.confirm(`Delete fund "${fund.title}"?`)) return;
-    try {
-      await api.delete(`funds/${fund.id}/`);
-      setMessage({ type: "success", text: "Fund deleted successfully." });
-      fetchFunds();
-    } catch {
-      setMessage({ type: "error", text: "Failed to delete fund." });
-    }
-  };
-
-  useEffect(() => {
-    fetchFunds();
-  }, [fetchFunds]);
-
-  // Prepare data for chart
-  const chartData = funds.map((f) => ({
-    month: new Date(f.date || f.created_at).toLocaleString("default", { month: "short" }),
-    income: f.category === "income" ? f.amount : 0,
-    expense: f.category === "expense" ? f.amount : 0,
-  }));
-
-  const totalIncome = funds
-    .filter((f) => f.category === "income")
-    .reduce((s, f) => s + Number(f.amount), 0);
-  const totalExpense = funds
-    .filter((f) => f.category === "expense")
-    .reduce((s, f) => s + Number(f.amount), 0);
-  const balance = totalIncome - totalExpense;
+  const total = funds.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.5 }}
       className="p-6 space-y-6"
     >
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      <h2 className="text-2xl font-bold text-primary">Funds Management</h2>
+      <p className="text-gray-500 dark:text-gray-400">
+        Add, view and export school funds
+      </p>
+
+      {/* Total Summary */}
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-primary">Funds Management</h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            Track income and expenditure across all school activities.
+          <h3 className="text-lg font-semibold">Total Funds</h3>
+          <p className="text-3xl font-bold text-emerald-500">
+            KSh {total.toLocaleString()}
           </p>
+        </div>
+        <BarChart3 size={42} className="text-emerald-400" />
+      </div>
+
+      {/* Add Fund Form */}
+      <form
+        onSubmit={handleAddFund}
+        className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow space-y-4"
+      >
+        <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+          <PlusCircle size={18} /> Add Fund Record
+        </h3>
+        <div className="grid sm:grid-cols-3 gap-4">
+          <input
+            type="text"
+            placeholder="Source"
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
+            className="p-3 border rounded-lg dark:border-gray-700 bg-transparent"
+          />
+          <input
+            type="number"
+            placeholder="Amount (KSh)"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="p-3 border rounded-lg dark:border-gray-700 bg-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Note (optional)"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="p-3 border rounded-lg dark:border-gray-700 bg-transparent"
+          />
         </div>
         <button
-          onClick={() => setShowModal(true)}
-          className="py-2 px-4 rounded-lg bg-primary text-white hover:bg-accent transition"
+          type="submit"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-accent transition"
         >
-          + Add Fund Record
+          Add Fund
         </button>
+      </form>
+
+      {/* List */}
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="font-semibold">Recent Transactions</h3>
+          <button className="flex items-center gap-2 text-sm border px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+            <Download size={14} /> Export CSV
+          </button>
+        </div>
+        {funds.length ? (
+          <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+            {funds.map((f) => (
+              <li
+                key={f.id}
+                className="py-3 flex justify-between text-sm text-gray-600 dark:text-gray-300"
+              >
+                <span>{f.source}</span>
+                <span className="font-medium text-emerald-500">
+                  +KSh {f.amount.toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500">No fund records yet.</p>
+        )}
       </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-[#1F2937] p-4 rounded-2xl shadow">
-          <h4 className="text-gray-500 text-sm">Total Income</h4>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-            KSh {totalIncome.toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-white dark:bg-[#1F2937] p-4 rounded-2xl shadow">
-          <h4 className="text-gray-500 text-sm">Total Expense</h4>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-            KSh {totalExpense.toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-white dark:bg-[#1F2937] p-4 rounded-2xl shadow">
-          <h4 className="text-gray-500 text-sm">Balance</h4>
-          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            KSh {balance.toLocaleString()}
-          </p>
-        </div>
-      </div>
-
-      {/* Chart */}
-      <FundChart data={chartData} />
-
-      {/* Table */}
-      <FundTable funds={funds} loading={loading} onEdit={setEditingFund} onDelete={handleDelete} />
-
-      {/* Modal */}
-      <FundFormModal
-        show={showModal || !!editingFund}
-        editingFund={editingFund}
-        onClose={() => {
-          setShowModal(false);
-          setEditingFund(null);
-        }}
-        onSave={handleSave}
-      />
     </motion.div>
   );
 }

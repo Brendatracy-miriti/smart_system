@@ -50,3 +50,43 @@ export function DataProvider({ children }) {
   );
 }
 export const useData = () => useContext(DataContext);
+
+// ---- FILE: src/context/DataContext.jsx ----
+
+export const DataProvider = ({ children }) => {
+  const [users, setUsers] = useState([]); // all registered users
+  const [students, setStudents] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [mentorships, setMentorships] = useState([]);
+
+  const addUser = (user) => {
+    setUsers((prev) => [...prev, user]);
+    if (user.role === "student") setStudents((p) => [...p, user]);
+    if (user.role === "teacher") setTeachers((p) => [...p, user]);
+  };
+
+  const requestMentorship = (studentId, teacherId) => {
+    setMentorships((prev) => [
+      ...prev,
+      { id: Date.now(), studentId, teacherId, status: "pending" },
+    ]);
+  };
+
+  const updateMentorshipStatus = (id, status) => {
+    setMentorships((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, status } : m))
+    );
+  };
+
+  const value = {
+    users,
+    students,
+    teachers,
+    mentorships,
+    addUser,
+    requestMentorship,
+    updateMentorshipStatus,
+  };
+
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+};
