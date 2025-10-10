@@ -17,10 +17,7 @@
     "lucide-react": "^0.545.0",
     "react": "^19.2.0",
     "react-dom": "^19.1.1",
-<<<<<<< HEAD
     "react-dropzone": "^14.3.8",
-=======
->>>>>>> d279d84971ee7c47161b5ac9e6a41190cd3072c9
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.3",
     "recharts": "^3.2.1",

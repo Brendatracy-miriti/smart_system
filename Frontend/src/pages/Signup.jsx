@@ -104,7 +104,7 @@ export default function Signup() {
         animate="show"
         variants={rightVariants}
         transition={{ duration: 0.7 }}
-        className="w-full md:w-2/5 flex items-center justify-center bg-[#0f172a] text-white overflow-y-auto py-10"
+        className="w-full md:w-2/5 flex flex-col bg-[#0f172a] text-white overflow-y-auto py-10"
       >
         <div className="max-w-md w-full mx-auto px-10">
           <h1 className="text-3xl font-bold mb-2 text-center">Create Account</h1>

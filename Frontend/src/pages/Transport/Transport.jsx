@@ -2,14 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, BusFront, AlertTriangle, Loader } from "lucide-react";
 import api from "../../utils/api";
-
-const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY_HERE";
+import { useLoadScript } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 const BUS_ID = 1; // TODO: Make this configurable or get from props/context
 const UPDATE_INTERVAL = 10000; // 10 seconds
 
 export default function Transport() {
   const mapRef = useRef(null);
-  const markerRef = useRef(null);
   const watchIdRef = useRef(null);
   const intervalRef = useRef(null);
 
@@ -19,6 +18,12 @@ export default function Transport() {
   const [error, setError] = useState(null);
   const [isSosActive, setIsSosActive] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [markerPos, setMarkerPos] = useState(null);
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
+    libraries: ["places"],
+  });
 
   // Get current location
   const getCurrentLocation = () => {
@@ -101,45 +106,12 @@ export default function Transport() {
   };
 
   useEffect(() => {
-    const loadMap = async () => {
-      if (!window.google) {
-        const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-        script.async = true;
-        script.onload = initMap;
-        document.body.appendChild(script);
-      } else initMap();
-    };
-
-    const initMap = () => {
-      const center = { lat: -1.286389, lng: 36.817223 }; // Nairobi fallback
-      const mapInstance = new window.google.maps.Map(mapRef.current, {
-        center,
-        zoom: 13,
-        styles: [
-          { elementType: "geometry", stylers: [{ color: "#1d2c4d" }] },
-          { elementType: "labels.text.fill", stylers: [{ color: "#8ec3b9" }] },
-        ],
-      });
-
-      const marker = new window.google.maps.Marker({
-        position: center,
-        map: mapInstance,
-        title: "School Bus 1",
-        icon: {
-          url: "https://img.icons8.com/color/48/school-bus.png",
-          scaledSize: new window.google.maps.Size(45, 45),
-        },
-      });
-
-      setMap(mapInstance);
-      markerRef.current = marker;
-
-      // Get initial location
+    // When loader indicates maps are available, attempt to get initial location
+    if (isLoaded) {
+      // set loading off and request location; the map onLoad handler will set map instance
+      setIsLoading(false);
       getCurrentLocation();
-    };
-
-    loadMap();
+    }
 
     // Set up periodic location updates
     intervalRef.current = setInterval(() => {
@@ -154,11 +126,20 @@ export default function Transport() {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
     };
-  }, []);
+  }, [isLoaded]);
 
   // Send location update when location changes
   useEffect(() => {
     if (location) {
+      // update marker position & center
+      setMarkerPos(location);
+      if (map) {
+        try {
+          map.panTo(location);
+        } catch (e) {
+          // ignore if map not interactive yet
+        }
+      }
       sendLocationUpdate(location.lat, location.lng);
     }
   }, [location]);
@@ -208,10 +189,35 @@ export default function Transport() {
         </div>
       )}
 
-      <div
-        ref={mapRef}
-        className="w-full h-[500px] rounded-2xl shadow-lg border dark:border-gray-700"
-      />
+      <div className="w-full h-[500px] rounded-2xl shadow-lg border dark:border-gray-700 overflow-hidden">
+        {!isLoaded ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <Loader className="animate-spin" size={24} />
+              Loading map...
+            </div>
+          </div>
+        ) : (
+          <GoogleMap
+            mapContainerStyle={{ width: "100%", height: "100%" }}
+            center={markerPos || { lat: -1.286389, lng: 36.817223 }}
+            zoom={13}
+            onLoad={(mapInstance) => {
+              mapRef.current = mapInstance;
+              setMap(mapInstance);
+            }}
+          >
+            {markerPos && (
+              <Marker
+                position={markerPos}
+                title="School Bus"
+                // simple custom icon; scaledSize will use browser default sizing
+                icon={{ url: "https://img.icons8.com/color/48/school-bus.png" }}
+              />
+            )}
+          </GoogleMap>
+        )}
+      </div>
 
       {location && (
         <div className="text-sm text-gray-600 dark:text-gray-400">

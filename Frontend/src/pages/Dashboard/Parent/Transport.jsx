@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Loader } from "lucide-react";
 import api from "../../../utils/api";
-
-const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY_HERE";
+import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 const BUS_ID = 1; // TODO: Make this configurable or get from props/context
 const UPDATE_INTERVAL = 10000; // 10 seconds
 
@@ -17,6 +16,12 @@ export default function Transport() {
   const [error, setError] = useState(null);
   const [isSosActive, setIsSosActive] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
+
+  const [markerPos, setMarkerPos] = useState(null);
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
+  });
 
   // Get current location
   const getCurrentLocation = () => {
@@ -99,12 +104,11 @@ export default function Transport() {
   };
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}`;
-    script.async = true;
-    script.onload = () => initMap();
-    document.body.appendChild(script);
-  }, []);
+    if (isLoaded) {
+      setIsLoading(false);
+      getCurrentLocation();
+    }
+  }, [isLoaded]);
 
   const initMap = () => {
     const center = { lat: -1.286389, lng: 36.817223 }; // Nairobi CBD fallback
@@ -135,6 +139,12 @@ export default function Transport() {
   // Send location update when location changes
   useEffect(() => {
     if (location) {
+      setMarkerPos(location);
+      if (map) {
+        try {
+          map.panTo(location);
+        } catch {}
+      }
       sendLocationUpdate(location.lat, location.lng);
     }
   }, [location]);
@@ -181,10 +191,27 @@ export default function Transport() {
         </div>
       )}
 
-      <div
-        ref={mapRef}
-        className="w-full h-[500px] rounded-xl shadow border border-gray-300"
-      />
+      <div className="w-full h-[500px] rounded-xl shadow border border-gray-300 overflow-hidden">
+        {!isLoaded ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <Loader className="animate-spin" size={24} />
+              Loading map...
+            </div>
+          </div>
+        ) : (
+          <GoogleMap
+            mapContainerStyle={{ width: "100%", height: "100%" }}
+            center={markerPos || { lat: -1.286389, lng: 36.817223 }}
+            zoom={13}
+            onLoad={(mapInstance) => {
+              setMap(mapInstance);
+            }}
+          >
+            {markerPos && <Marker position={markerPos} title="Bus" />}
+          </GoogleMap>
+        )}
+      </div>
 
       {location && (
         <div className="text-sm text-gray-600 dark:text-gray-400">
