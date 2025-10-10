@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import UserTable from "../../../ui/UserTable";
 import UserFormModal from "../../../ui/UserFormModal";
-import api from "../../../utils/api";
 import { useMessage } from "../../../hooks/useMessage";
+import { useData } from "../../../context/DataContext";
 
 export default function Users() {
   const { setMessage } = useMessage();
@@ -11,12 +11,14 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const { data, addUser, updateUser, setData } = useData();
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await api.get("users/"); //backend endpoint
-      setUsers(res.data || []);
+      // load from DataContext/localStorage
+      const local = Array.isArray(data?.users) ? data.users : [];
+      setUsers(local);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -28,16 +30,20 @@ export default function Users() {
   const handleSave = async (data) => {
     try {
       if (editingUser) {
-        await api.put(`users/${editingUser.id}/`, data);
+        updateUser(editingUser.id, data);
         setMessage({ type: "success", text: "User updated successfully!" });
       } else {
-        await api.post("users/", data);
+        const u = { id: Date.now(), ...data };
+        addUser(u);
         setMessage({ type: "success", text: "User created successfully!" });
       }
       setShowModal(false);
       setEditingUser(null);
-      fetchUsers();
+      // refresh local list
+      const local = Array.isArray(data?.users) ? data.users : [];
+      setUsers(local);
     } catch (err) {
+      console.error(err);
       setMessage({ type: "error", text: "Failed to save user." });
     }
   };
@@ -45,9 +51,11 @@ export default function Users() {
   const handleDelete = async (u) => {
     if (!window.confirm(`Delete ${u.name}?`)) return;
     try {
-      await api.delete(`users/${u.id}/`);
+      // remove locally
+      setData((p) => ({ ...p, users: p.users.filter((x) => x.id !== u.id) }));
       setMessage({ type: "success", text: "User deleted successfully!" });
-      fetchUsers();
+      const local = Array.isArray(data?.users) ? data.users.filter((x) => x.id !== u.id) : [];
+      setUsers(local);
     } catch {
       setMessage({ type: "error", text: "Failed to delete user." });
     }

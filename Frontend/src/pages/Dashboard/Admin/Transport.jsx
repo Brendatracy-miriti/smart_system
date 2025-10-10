@@ -2,32 +2,24 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BusTable from "../../../ui/BusTable";
 import TransportLogList from "../../../ui/TransportLogList";
-import api from "../../../utils/api";
 import { useMessage } from "../../../hooks/useMessage";
+import { useData } from "../../../context/DataContext";
 
 export default function Transport() {
   const [buses, setBuses] = useState([]);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const { setMessage } = useMessage();
+  const { data, addBus, upsertBus, setData } = useData();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [busRes, logRes] = await Promise.all([
-          api.get("transport/"),
-          api.get("transport/logs/"),
-        ]);
-        setBuses(busRes.data || []);
-        setLogs(logRes.data || []);
-      } catch {
-        setMessage({ type: "error", text: "Could not fetch transport data." });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [setMessage]);
+    // load from DataContext/localStorage
+    const localBuses = Array.isArray(data?.buses) ? data.buses : [];
+    const localLogs = Array.isArray(data?.transportLogs) ? data.transportLogs : [];
+    setBuses(localBuses);
+    setLogs(localLogs);
+    setLoading(false);
+  }, [data]);
 
   const handleView = (bus) => {
     setMessage({
