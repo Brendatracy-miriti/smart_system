@@ -1,32 +1,30 @@
 import React, { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { DataContext } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
 import { useMessage } from "../context/MessageContext";
 import loginIllustration from "../assets/login-signup illustration.svg";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function Signup() {
-  const { data, setData } = useContext(DataContext);
   const { signup } = useAuth();
   const { setMessage } = useMessage();
   const navigate = useNavigate();
 
   const [role, setRole] = useState("student");
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  // role fields
   const [admission, setAdmission] = useState("");
   const [course, setCourse] = useState("");
   const [childStudentId, setChildStudentId] = useState("");
   const [teacherCourses, setTeacherCourses] = useState("");
-
-  // ...existing code...
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,23 +34,18 @@ export default function Signup() {
     }
 
     try {
-      const newUser = {
-        id: Date.now(),
-        name,
-        email,
-        password,
-        role,
-      };
-
+      setLoading(true);
       const extra = {};
+
       if (role === "student") {
         extra.admission_number = admission;
         extra.course = course;
-        extra.studentID = admission || `STU${Date.now()}`;
       }
+
       if (role === "parent") {
         extra.childStudentId = childStudentId || null;
       }
+
       if (role === "teacher") {
         extra.courses = teacherCourses
           .split(",")
@@ -60,41 +53,13 @@ export default function Signup() {
           .filter(Boolean);
       }
 
-      const newUserWithExtra = { ...newUser, ...extra };
-
-      // Save to localStorage via DataContext
-      const updatedUsers = [...data.users, newUserWithExtra];
-      setData((prev) => ({ ...prev, users: updatedUsers }));
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-
-      // Auto-link parent <-> student
-      if (role === "parent" && childStudentId) {
-        const student = updatedUsers.find(
-          (u) =>
-            u.role === "student" &&
-            (u.admission_number === childStudentId ||
-              u.studentID === childStudentId)
-        );
-        if (!student) {
-          setMessage({
-            type: "error",
-            text: "No student found with that ID. Link manually later in settings.",
-          });
-        }
-      }
-
-      setMessage({ type: "success", text: "Signup successful!" });
-
-      // Redirect
-      if (role === "admin") navigate("/admin/dashboard");
-      if (role === "teacher") navigate("/teacher");
-      if (role === "parent") navigate("/parent");
-      if (role === "student") navigate("/student");
+      await signup({ name, username, email, password, role, extra });
+      setMessage({ type: "success", text: "Signup success!" });
+      navigate(`/${role}`);
     } catch (err) {
-      setMessage({
-        type: "error",
-        text: err.message || "Signup failed. Try again.",
-      });
+      setMessage({ type: "error", text: err.message || "Signup failed" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,22 +73,20 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex h-screen w-full">
-      {/* LEFT SIDE - Illustration + Welcome text */}
+    <div className="flex flex-col md:flex-row h-screen w-full min-h-screen">
+      {/* LEFT SIDE */}
       <motion.div
         initial="hidden"
         animate="show"
         variants={leftVariants}
         transition={{ duration: 0.7 }}
-        className="hidden md:flex w-3/5 flex-col items-center justify-center text-white bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600"
+        className="hidden md:flex w-3/5 flex-col items-center justify-center text-white bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 overflow-hidden"
       >
         <div className="w-4/5 flex flex-col items-center text-center px-8">
           <h2 className="text-4xl font-bold mb-4">Welcome to Edu-Guardian</h2>
           <p className="text-lg mb-6 text-white/90">
             Safe. Transparent. Smart. Connect your school community in one platform.
           </p>
-
-          {/* Why EduGuardian Box */}
           <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-lg mb-8 w-2/4">
             <h3 className="font-semibold text-white text-lg mb-2">Why EduGuardian?</h3>
             <ul className="mt-3 text-sm text-white/90 space-y-1">
@@ -132,46 +95,25 @@ export default function Signup() {
               <li>• Personalized revision tools</li>
             </ul>
           </div>
-
-          <img
-            src={loginIllustration}
-            alt="Login illustration"
-            className="w-3/4 mx-auto drop-shadow-lg"
-          />
+          <img src={loginIllustration} alt="Login illustration" className="w-2/3 mx-auto drop-shadow-lg mt-6" />
         </div>
       </motion.div>
 
-      {/* RIGHT SIDE - Signup Form */}
+      {/* RIGHT SIDE - SIGNUP FORM */}
       <motion.div
         initial="hidden"
         animate="show"
         variants={rightVariants}
         transition={{ duration: 0.7 }}
-        className="w-full md:w-2/5 flex items-center justify-center bg-[#0f172a] text-white"
+        className="w-full md:w-2/5 flex items-center justify-center bg-[#0f172a] text-white overflow-y-auto py-10"
       >
-        <div className="max-w-md w-full mx-auto px-10 h-screen overflow-y-auto">
+        <div className="max-w-md w-full mx-auto px-10">
           <h1 className="text-3xl font-bold mb-2 text-center">Create Account</h1>
           <p className="text-gray-400 mb-8 text-center">
             Fill in your details to get started
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Role Select */}
-            <div>
-              <label className="block mb-2 text-sm">Select Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">-- choose role --</option>
-                <option value="student">Student</option>
-                <option value="parent">Parent</option>
-                <option value="teacher">Teacher</option>
-              </select>
-            </div>
-
             {/* Full Name */}
             <div>
               <label className="block mb-2 text-sm">Full Name</label>
@@ -185,22 +127,30 @@ export default function Signup() {
               />
             </div>
 
-            {/* Email */}
+            {/* Username */}
             <div>
-              <label className="block mb-2 text-sm">Email</label>
+              <label className="block mb-2 text-sm">Username</label>
               <input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="janedoe"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
-            {/* Profile photo */}
+            {/* Email */}
             <div>
-              {/* Profile photo removed per design */}
+              <label className="block mb-2 text-sm">Email</label>
+              <input
+                type="email"
+                placeholder="jane@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
             </div>
 
             {/* Password */}
@@ -209,7 +159,7 @@ export default function Signup() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
+                  placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 pr-10 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
@@ -220,11 +170,7 @@ export default function Signup() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
                 >
-                  {showPassword ? (
-                    <AiOutlineEyeInvisible size={20} />
-                  ) : (
-                    <AiOutlineEye size={20} />
-                  )}
+                  {showPassword ? <AiOutlineEye size={20} /> : <AiOutlineEyeInvisible size={20} />}
                 </button>
               </div>
             </div>
@@ -246,16 +192,29 @@ export default function Signup() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
                 >
-                  {showConfirmPassword ? (
-                    <AiOutlineEyeInvisible size={20} />
-                  ) : (
-                    <AiOutlineEye size={20} />
-                  )}
+                  {showConfirmPassword ? <AiOutlineEye size={20} /> : <AiOutlineEyeInvisible size={20} />}
                 </button>
               </div>
             </div>
 
-            {/* Role-specific fields */}
+            {/* Role Select */}
+            <div>
+              <label className="block mb-2 text-sm">Role</label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select role</option>
+                <option value="student">Student</option>
+                <option value="parent">Parent</option>
+                <option value="teacher">Teacher</option>
+                <option value="teacher">Admin</option>
+              </select>
+            </div>
+
+            {/* Conditional Fields */}
             {role === "student" && (
               <>
                 <div>
@@ -267,6 +226,7 @@ export default function Signup() {
                     className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
+
                 <div>
                   <label className="block mb-2 text-sm">Course / Class</label>
                   <input
@@ -281,26 +241,13 @@ export default function Signup() {
 
             {role === "parent" && (
               <div>
-                <label className="block mb-2 text-sm">Link to Child (Student ID)</label>
-                <select
+                <label className="block mb-2 text-sm">Link to Child</label>
+                <input
                   value={childStudentId}
                   onChange={(e) => setChildStudentId(e.target.value)}
+                  placeholder="Child student ID"
                   className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">
-                    -- Select child (if already registered) --
-                  </option>
-                  {data.users
-                    .filter((u) => u.role === "student")
-                    .map((s) => (
-                      <option key={s.id} value={s.studentID || s.admission_number}>
-                        {s.name} ({s.course || s.admission_number})
-                      </option>
-                    ))}
-                </select>
-                <p className="text-xs text-gray-400 mt-1">
-                  If child not registered yet, link later in settings.
-                </p>
+                />
               </div>
             )}
 
@@ -317,21 +264,19 @@ export default function Signup() {
               </div>
             )}
 
-            {/* Signup Button */}
+            {/* Submit Button */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-md font-semibold transition"
             >
-              Create Account
+              {loading ? "Creating account..." : "Create Account"}
             </button>
           </form>
 
           <p className="text-gray-400 text-sm mt-6 text-center">
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-sky-400 hover:underline font-medium"
-            >
+            <Link to="/login" className="text-sky-400 hover:underline font-medium">
               Login
             </Link>
           </p>
