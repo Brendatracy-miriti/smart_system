@@ -20,21 +20,13 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [avatar, setAvatar] = useState("");
   // role fields
   const [admission, setAdmission] = useState("");
   const [course, setCourse] = useState("");
   const [childStudentId, setChildStudentId] = useState("");
   const [teacherCourses, setTeacherCourses] = useState("");
 
-  // preview + save avatar
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setAvatar(ev.target.result);
-    reader.readAsDataURL(file);
-  };
+  // ...existing code...
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +42,6 @@ export default function Signup() {
         email,
         password,
         role,
-        avatar,
       };
 
       const extra = {};
@@ -209,20 +200,7 @@ export default function Signup() {
 
             {/* Profile photo */}
             <div>
-              <label className="block mb-2 text-sm">Profile Photo</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {avatar && (
-                <img
-                  src={avatar}
-                  alt="Preview"
-                  className="mt-2 w-16 h-16 rounded-full object-cover border"
-                />
-              )}
+              {/* Profile photo removed per design */}
             </div>
 
             {/* Password */}
