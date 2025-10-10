@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { useMessage } from "../context/MessageContext";
+import { useNavigate } from "react-router-dom";
 import loginIllustration from "../assets/login-signup illustration.svg";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 
 export default function Login() {
   const { login } = useAuth();
   const { setMessage } = useMessage();
+  const navigate = useNavigate();
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +20,12 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login({ identifier: identifier.trim(), password: password.trim() });
+      const user = await login({ identifier: identifier.trim(), password: password.trim() });
+      // redirect based on role
+      if (user?.role === "admin") navigate("/admin/dashboard");
+      else if (user?.role === "teacher") navigate("/teacher");
+      else if (user?.role === "parent") navigate("/parent");
+      else if (user?.role === "student") navigate("/student");
     } catch {
       setMessage({ type: "error", text: "Login failed, please try again." });
     } finally {
@@ -86,17 +93,19 @@ export default function Login() {
           <p className="text-gray-400 mb-8">Enter your account details</p>
 
           {/* Email or Username */}
-          <div className="mb-4">
-            <label className="block mb-2 text-sm">Email or Username</label>
-            <input
-              type="text"
-              placeholder="Enter your email or username"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email or Username */}
+              <div className="mb-4">
+                <label className="block mb-2 text-sm">Email or Username</label>
+                <input
+                  type="text"
+                  placeholder="Enter your email or username"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
 
           {/* Password */}
           <div>
@@ -135,13 +144,15 @@ export default function Login() {
           </div>
 
           {/* Login Button */}
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-md font-semibold transition"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
+              {/* Login Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-md font-semibold transition"
+              >
+                {loading ? "Logging in..." : "Login"}
+              </button>
+            </form>
 
           <p className="text-gray-400 text-sm mt-6 text-center">
             Don’t have an account?{" "}

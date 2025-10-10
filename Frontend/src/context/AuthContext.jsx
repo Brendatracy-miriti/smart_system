@@ -37,15 +37,18 @@ export function AuthProvider({ children }) {
 
   // login accepts either an email or a username (identifier)
   const login = async ({ email, password, identifier }) => {
-    const id = (email || identifier || "").trim();
-    if (!id) throw new Error("Missing login identifier");
+    // ensure default admin exists (covers fresh installs / race conditions)
+    ensureAdmin({ id: uuidv4(), name: "Admin", email: "Admin", password: "AdminSystem", role: "admin", avatarBase64: null });
 
-    // try email exact match first
-    let u = findUserByEmail(id);
+    const idRaw = (email || identifier || "").trim();
+    if (!idRaw) throw new Error("Missing login identifier");
+    const id = idRaw.toLowerCase();
+
+    // search users case-insensitively by email, username or name
+    const all = getUsers();
+    let u = all.find((x) => (x.email || "").toLowerCase() === id);
     if (!u) {
-      // fallback: search by username/name or other identifier
-      const all = getUsers();
-      u = all.find((x) => x.name === id || x.username === id || x.email === id);
+      u = all.find((x) => (x.username || "").toLowerCase() === id || (x.name || "").toLowerCase() === id);
     }
 
     if (!u) throw new Error("No account for this identifier");

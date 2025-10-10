@@ -20,8 +20,9 @@ export default function AdminDashboard() {
     fundsTotal: 0,
   });
 
-  const { getAtRiskStudents } = useContext(DataContext);
-  const atRisk = getAtRiskStudents();
+  const dataCtx = useContext(DataContext);
+  const getAtRiskStudents = typeof dataCtx?.getAtRiskStudents === "function" ? dataCtx.getAtRiskStudents : () => [];
+  const atRisk = Array.isArray(getAtRiskStudents()) ? getAtRiskStudents() : [];
 
   const [trendData, setTrendData] = useState([]); // [{month:'Jan', income:100, expense:50}]
   const { setMessage } = useMessage();
@@ -89,20 +90,21 @@ export default function AdminDashboard() {
     };
   }, [setMessage]);
 
-  const { students, calculateRisk } = useContext(DataContext);
+  const students = Array.isArray(dataCtx?.students) ? dataCtx.students : [];
+  const calculateRisk = typeof dataCtx?.calculateRisk === "function" ? dataCtx.calculateRisk : () => "Safe";
 
-// group by course
-const riskByCourse = useMemo(() => {
-  const map = {};
-  students.forEach((s) => {
-    const course = s.course || "Unknown";
-    const risk = calculateRisk(s);
-    if (!map[course]) map[course] = { course, safe: 0, risk: 0 };
-    if (risk === "At-Risk") map[course].risk += 1;
-    else map[course].safe += 1;
-  });
-  return Object.values(map);
-}, [students, calculateRisk]);
+  // group by course
+  const riskByCourse = useMemo(() => {
+    const map = {};
+    students.forEach((s) => {
+      const course = s.course || "Unknown";
+      const risk = calculateRisk(s);
+      if (!map[course]) map[course] = { course, safe: 0, risk: 0 };
+      if (risk === "At-Risk") map[course].risk += 1;
+      else map[course].safe += 1;
+    });
+    return Object.values(map);
+  }, [students, calculateRisk]);
 
   return (
     <motion.div
@@ -191,7 +193,7 @@ const riskByCourse = useMemo(() => {
         ) : (
           <p className="text-gray-500 mt-2">No at-risk students detected.</p>
         )}
-      </div>;
+      </div>
 
       <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow mt-6">
       <h3 className="text-lg font-semibold flex items-center gap-2 mb-4 text-primary">
