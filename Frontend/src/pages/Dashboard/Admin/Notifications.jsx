@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Bell, Trash2, CheckCircle2, AlertTriangle, Bus, DollarSign } from "lucide-react";
+import { Bell, Trash2, CheckCircle2, AlertTriangle, Bus, DollarSign, Send } from "lucide-react";
 import api from "../../../utils/api";
 import { useMessage } from "../../../hooks/useMessage";
+import { pushNotification, getNotifications } from "../../../utils/localData";
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -13,8 +14,14 @@ export default function Notifications() {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const res = await api.get("notifications/");
-      setNotifications(res.data || []);
+      try {
+        const res = await api.get("notifications/");
+        setNotifications(res.data || []);
+      } catch {
+        // fallback to local storage
+        const local = getNotifications();
+        setNotifications(local || []);
+      }
     } catch (err) {
       setMessage({ type: "error", text: "Failed to fetch notifications." });
     } finally {
@@ -24,8 +31,15 @@ export default function Notifications() {
 
   const handleMarkAllRead = async () => {
     try {
-      await api.post("notifications/mark-all-read/");
-      fetchNotifications();
+      try {
+        await api.post("notifications/mark-all-read/");
+        fetchNotifications();
+      } catch {
+        // fallback to local storage: mark all as read
+        const local = getNotifications().map((n) => ({ ...n, read: true }));
+        localStorage.setItem("eg_notifications", JSON.stringify(local));
+        setNotifications(local);
+      }
       setMessage({ type: "success", text: "All notifications marked as read." });
     } catch {
       setMessage({ type: "error", text: "Could not mark all as read." });
@@ -34,11 +48,48 @@ export default function Notifications() {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`notifications/${id}/`);
+      try {
+        await api.delete(`notifications/${id}/`);
+      } catch {
+        // fallback: remove from local
+        const local = getNotifications().filter((n) => n.id !== id);
+        // write back
+        // eslint-disable-next-line no-undef
+        localStorage.setItem("eg_notifications", JSON.stringify(local));
+      }
       setNotifications((prev) => prev.filter((n) => n.id !== id));
       setMessage({ type: "success", text: "Notification deleted." });
     } catch {
       setMessage({ type: "error", text: "Failed to delete notification." });
+    }
+  };
+
+  // compose
+  const [compose, setCompose] = useState({ title: "", message: "", type: "system" });
+  const handlePost = async () => {
+    if (!compose.title.trim() || !compose.message.trim()) {
+      setMessage({ type: "error", text: "Please enter title and message." });
+      return;
+    }
+
+    const payload = {
+      title: compose.title,
+      message: compose.message,
+      type: compose.type,
+    };
+
+    try {
+      const res = await api.post("notifications/", payload);
+      // assume API returns created object
+      setNotifications((prev) => [res.data, ...prev]);
+      setMessage({ type: "success", text: "Notification posted." });
+      setCompose({ title: "", message: "", type: "system" });
+    } catch {
+      // fallback to local storage
+      const saved = pushNotification({ title: payload.title, message: payload.message, type: payload.type, createdAt: new Date().toISOString() });
+      setNotifications((prev) => [saved, ...prev]);
+      setMessage({ type: "success", text: "Notification saved locally (offline mode)." });
+      setCompose({ title: "", message: "", type: "system" });
     }
   };
 
@@ -74,13 +125,40 @@ export default function Notifications() {
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <button
             onClick={handleMarkAllRead}
             className="py-2 px-3 rounded-lg bg-primary text-white hover:bg-accent transition"
           >
             Mark all as read
           </button>
+
+          {/* Compose quick post */}
+          <div className="flex items-center gap-2">
+            <input
+              value={compose.title}
+              onChange={(e) => setCompose((s) => ({ ...s, title: e.target.value }))}
+              placeholder="Title"
+              className="px-3 py-2 rounded-lg border bg-white dark:bg-[#111827]"
+            />
+            <select
+              value={compose.type}
+              onChange={(e) => setCompose((s) => ({ ...s, type: e.target.value }))}
+              className="px-2 py-2 rounded-lg border bg-white dark:bg-[#111827]"
+            >
+              <option value="system">System</option>
+              <option value="transport">Transport</option>
+              <option value="fund">Fund</option>
+              <option value="emergency">Emergency</option>
+            </select>
+            <button
+              onClick={handlePost}
+              className="py-2 px-3 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
+            >
+              <Send size={16} />
+              Post
+            </button>
+          </div>
         </div>
       </div>
 
@@ -131,7 +209,7 @@ export default function Notifications() {
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{n.message}</p>
                     <span className="text-xs text-gray-400">
-                      {new Date(n.created_at).toLocaleString()}
+                      {new Date(n.createdAt || n.created_at || n.created_at).toLocaleString()}
                     </span>
                   </div>
                 </div>
