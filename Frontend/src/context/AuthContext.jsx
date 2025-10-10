@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
-  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser, ensureAdmin
+  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser, ensureAdmin, getUsers
 } from "../utils/localData";
 
 export const AuthContext = createContext();
@@ -35,9 +35,20 @@ export function AuthProvider({ children }) {
     return user;
   };
 
-  const login = async ({ email, password }) => {
-    const u = findUserByEmail(email);
-    if (!u) throw new Error("No account for this email");
+  // login accepts either an email or a username (identifier)
+  const login = async ({ email, password, identifier }) => {
+    const id = (email || identifier || "").trim();
+    if (!id) throw new Error("Missing login identifier");
+
+    // try email exact match first
+    let u = findUserByEmail(id);
+    if (!u) {
+      // fallback: search by username/name or other identifier
+      const all = getUsers();
+      u = all.find((x) => x.name === id || x.username === id || x.email === id);
+    }
+
+    if (!u) throw new Error("No account for this identifier");
     if (u.password !== password) throw new Error("Invalid password");
     localStorage.setItem("eg_current_user", JSON.stringify(u));
     setCurrent(u);

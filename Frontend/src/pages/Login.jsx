@@ -9,7 +9,7 @@ export default function Login() {
   const { login } = useAuth();
   const { setMessage } = useMessage();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -18,7 +18,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login({ email: email.trim(), password: password.trim() });
+      await login({ identifier: identifier.trim(), password: password.trim() });
     } catch {
       setMessage({ type: "error", text: "Login failed, please try again." });
     } finally {
@@ -85,15 +85,16 @@ export default function Login() {
           <h1 className="text-3xl font-bold mb-2">Login</h1>
           <p className="text-gray-400 mb-8">Enter your account details</p>
 
-          {/* Username */}
+          {/* Email or Username */}
           <div className="mb-4">
-            <label className="block mb-2 text-sm">Username</label>
+            <label className="block mb-2 text-sm">Email or Username</label>
             <input
               type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your email or username"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
 
