@@ -7,7 +7,12 @@ import { BookOpen, Clock, ClipboardList, BarChart2 } from "lucide-react";
 import { useLive } from "../../../context/LiveContext";
 
 export default function StudentDashboard() {
-  const { timetables, assignments, submissions, grades } = useLive();
+  const liveData = useLive();
+  // Defensive: fallback to empty arrays if context is not ready
+  const timetables = liveData?.timetables || [];
+  const assignments = liveData?.assignments || [];
+  const submissions = liveData?.submissions || [];
+  const grades = liveData?.grades || [];
   const [profile, setProfile] = useState(null);
   const [upcoming, setUpcoming] = useState([]);
 

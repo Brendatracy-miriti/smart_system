@@ -6,7 +6,15 @@ import { DataContext } from "../../../context/DataContext";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 
 export default function ParentDashboard() {
-  const { parents, students, assignments, timetables, attendance, grades } = useLive();
+  const liveData = useLive();
+  // Defensive: fallback to empty arrays if context is not ready
+  const parents = liveData?.parents || [];
+  const students = liveData?.students || [];
+  const assignments = liveData?.assignments || [];
+  const timetables = liveData?.timetables || [];
+  const attendance = liveData?.attendance || [];
+  const grades = liveData?.grades || [];
+
   const user = JSON.parse(localStorage.getItem("eg_current_user"));
   const parent = parents.find(p => p.userId === user?.id);
   const child = students.find(s => s.id === parent?.childStudentId);
@@ -54,7 +62,7 @@ export default function ParentDashboard() {
           <ShieldCheck size={18} /> Your child is performing well.
         </p>
       )}
-    </div>;
+    </div>
     </div>
   );
 }

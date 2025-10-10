@@ -15,9 +15,13 @@ export default function TeacherDashboard() {
   const [performance, setPerformance] = useState([]);
   const { setMessage } = useMessage();
 
-  const { students, calculateRisk } = useContext(DataContext);
+  const dataContext = useContext(DataContext);
+  const students = dataContext?.students || [];
+  const calculateRisk = dataContext?.calculateRisk || (() => "Unknown");
+  // You may need to define currentUser if not already defined
+  const currentUser = JSON.parse(localStorage.getItem("eg_current_user"));
   const myAtRisk = students.filter(
-    (s) => s.teacherId === currentUser.id && calculateRisk(s) === "At-Risk"
+    (s) => s.teacherId === currentUser?.id && calculateRisk(s) === "At-Risk"
   );
 
   useEffect(() => {

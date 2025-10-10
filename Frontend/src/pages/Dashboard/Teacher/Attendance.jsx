@@ -6,7 +6,10 @@ import { useMessage } from "../../../context/MessageContext";
 import { v4 as uuidv4 } from "uuid";
 
 export default function TeacherAttendance() {
-  const { students, classes, refresh } = useLive();
+  const liveData = useLive();
+  const students = liveData?.students || [];
+  const classes = liveData?.classes || [];
+  const refresh = liveData?.refresh;
   const { current } = useAuth();
   const { setMessage } = useMessage();
 

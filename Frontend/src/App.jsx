@@ -41,7 +41,9 @@ import ParentSettings from "./pages/Dashboard/Parent/Settings";
 import Transport from "./pages/Transport/Transport";
 
 // Student
+import StudentSidebar from "./pages/Dashboard/Student/Sidebar";
 import StudentDashboard from "./pages/Dashboard/Student/StudentDashboard";
+
 
 // UI / Extras
 import ThemeToggle from "./ui/ThemeToggle";
@@ -91,8 +93,11 @@ function AnimatedRoutes() {
         </Route>
 
         {/* Student */}
-        <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/student/mentorship" element={<MentorshipList />} />
+        <Route path="/student/*" element={<StudentSidebar />}> 
+          <Route index element={<StudentDashboard />} />
+          <Route path="mentorship" element={<MentorshipList />} />
+        </Route>
+
       </Routes>
     </AnimatePresence>
   );
