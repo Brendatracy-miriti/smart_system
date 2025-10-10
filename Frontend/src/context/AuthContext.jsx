@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
-  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser, ensureAdmin
+  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser, ensureAdmin, getUsers
 } from "../utils/localData";
 
 export const AuthContext = createContext();
@@ -35,9 +35,23 @@ export function AuthProvider({ children }) {
     return user;
   };
 
-  const login = async ({ email, password }) => {
-    const u = findUserByEmail(email);
-    if (!u) throw new Error("No account for this email");
+  // login accepts either an email or a username (identifier)
+  const login = async ({ email, password, identifier }) => {
+    // ensure default admin exists (covers fresh installs / race conditions)
+    ensureAdmin({ id: uuidv4(), name: "Admin", email: "Admin", password: "AdminSystem", role: "admin", avatarBase64: null });
+
+    const idRaw = (email || identifier || "").trim();
+    if (!idRaw) throw new Error("Missing login identifier");
+    const id = idRaw.toLowerCase();
+
+    // search users case-insensitively by email, username or name
+    const all = getUsers();
+    let u = all.find((x) => (x.email || "").toLowerCase() === id);
+    if (!u) {
+      u = all.find((x) => (x.username || "").toLowerCase() === id || (x.name || "").toLowerCase() === id);
+    }
+
+    if (!u) throw new Error("No account for this identifier");
     if (u.password !== password) throw new Error("Invalid password");
     localStorage.setItem("eg_current_user", JSON.stringify(u));
     setCurrent(u);

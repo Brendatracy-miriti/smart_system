@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Outlet } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
 import {
   Menu,
   X,
@@ -11,15 +12,19 @@ import {
   BookOpen,
   Settings,
   LogOut,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
+  const { logout } = useAuth();
   const handleLogout = () => {
-    localStorage.removeItem("smartedu_user");
+    logout();
     navigate("/login");
   };
 
@@ -34,7 +39,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Mobile topbar */}
       <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-[#111827] shadow-md">
         <h1 className="text-lg font-bold text-primary">Edu-Guardian</h1>
@@ -46,41 +51,62 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Sidebar (Desktop) */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-[#111827] text-gray-800 dark:text-gray-200 min-h-screen shadow-lg">
-        <div className="p-5">
-          <h1 className="text-xl font-bold text-primary">Edu-Guardian</h1>
-        </div>
-
-        <nav className="flex-1 px-3 space-y-1">
-          {links.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  isActive
-                    ? "bg-primary text-white"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`
-              }
+      <div className="flex">
+        {/* Sidebar (Desktop) */}
+        <aside
+          className={`hidden lg:flex flex-col bg-white dark:bg-[#111827] text-gray-800 dark:text-gray-200 min-h-screen shadow-lg transition-all duration-200 ${
+            collapsed ? "w-20" : "w-64"
+          }`}
+        >
+          <div className="p-4 flex items-center justify-between">
+            <h1 className={`text-xl font-bold text-primary transition-opacity ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+              Edu-Guardian
+            </h1>
+            <button
+              onClick={() => setCollapsed((s) => !s)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="text-gray-600 dark:text-gray-200 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 z-50"
+              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              <Icon size={18} />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-        </nav>
+              {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            </button>
+          </div>
 
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 transition"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
-        </div>
-      </aside>
+          <nav className="flex-1 px-3 space-y-1">
+            {links.map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    isActive
+                      ? "bg-primary text-white"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`
+                }
+              >
+                <Icon size={18} />
+                <span className={`${collapsed ? "hidden" : "block"}`}>{label}</span>
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 transition"
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
+        </aside>
+
+        {/* Main content area where child routes render */}
+        <main className="flex-1 p-6">
+          <Outlet />
+        </main>
+      </div>
 
       {/* Sidebar (Mobile Drawer) */}
       <AnimatePresence>
@@ -141,6 +167,6 @@ export default function Sidebar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

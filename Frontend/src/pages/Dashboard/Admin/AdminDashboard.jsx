@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { Users, FileText, Truck, DollarSign } from "lucide-react";
 import StatCard from "../../../ui/StatCard";
 import FundChart from "../../../ui/FundChart";
-import api from "../../../utils/api";
 import { useMessage } from "../../../hooks/useMessage";
+import { useData } from "../../../context/DataContext";
 
 import { AlertTriangle, PieChart as PieChartIcon } from "lucide-react";
 import { useContext, useMemo } from "react";
@@ -20,89 +20,68 @@ export default function AdminDashboard() {
     fundsTotal: 0,
   });
 
-  const { getAtRiskStudents } = useContext(DataContext);
-  const atRisk = getAtRiskStudents();
+  const dataCtx = useContext(DataContext);
+  const getAtRiskStudents = typeof dataCtx?.getAtRiskStudents === "function" ? dataCtx.getAtRiskStudents : () => [];
+  const atRisk = Array.isArray(getAtRiskStudents()) ? getAtRiskStudents() : [];
 
   const [trendData, setTrendData] = useState([]); // [{month:'Jan', income:100, expense:50}]
   const { setMessage } = useMessage();
+  const { data } = useData();
 
   useEffect(() => {
-    let mounted = true;
+    // compute counts and trend locally from DataContext/localStorage
+    setLoading(true);
+    try {
+      const studentsArr = Array.isArray(data?.users) ? data.users.filter((u) => u.role === "student") : [];
+      const teachersArr = Array.isArray(data?.users) ? data.users.filter((u) => u.role === "teacher") : [];
+      const busesArr = Array.isArray(data?.buses) ? data.buses : [];
+      const fundsArr = Array.isArray(data?.funds) ? data.funds : [];
 
-    const fetchOverview = async () => {
-      setLoading(true);
-      try {
-        const [studentsRes, teachersRes, transportRes, fundsRes] = await Promise.all([
-          api.get("students/"),
-          api.get("teachers/"),
-          api.get("transport/"),
-          api.get("funds/"),
-        ]);
+      const students = studentsArr.length;
+      const teachers = teachersArr.length;
+      const buses = new Set(busesArr.map((t) => t.busId || t.id)).size;
 
-        if (!mounted) return;
+      const fundsTotal = fundsArr.reduce((s, r) => s + (Number(r.amount) || 0), 0);
 
-        const students = Array.isArray(studentsRes.data) ? studentsRes.data.length : 0;
-        const teachers = Array.isArray(teachersRes.data) ? teachersRes.data.length : 0;
-        const buses = Array.isArray(transportRes.data)
-          ? new Set(transportRes.data.map((t) => t.bus_id)).size
-          : 0;
+      setCounts({ students, teachers, buses, fundsTotal });
 
-        const fundsTotal = Array.isArray(fundsRes.data)
-          ? fundsRes.data.reduce((s, r) => s + (Number(r.amount) || 0), 0)
-          : 0;
-
-        setCounts({ students, teachers, buses, fundsTotal });
-
-        // Trend by month from funds data
-        if (Array.isArray(fundsRes.data) && fundsRes.data.length) {
-          const map = {};
-          fundsRes.data.forEach((f) => {
-            const d = new Date(f.date || f.created || f.timestamp);
-            if (isNaN(d)) return;
-            const label = d.toLocaleString("default", { month: "short" });
-            map[label] = (map[label] || 0) + (Number(f.amount) || 0);
-          });
-          const trend = Object.keys(map).map((k) => ({
-            month: k,
-            income: map[k],
-            expense: map[k] * 0.6, // mock expense for chart balance
-          }));
-          setTrendData(trend);
-        } else {
-          setTrendData([]);
-        }
-
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        setLoading(false);
-        setMessage({
-          type: "error",
-          text: "Could not fetch admin overview. Please check your backend connection.",
+      if (fundsArr.length) {
+        const map = {};
+        fundsArr.forEach((f) => {
+          const d = new Date(f.date || f.createdAt || f.created_at || f.timestamp || f.created || Date.now());
+          if (isNaN(d)) return;
+          const label = d.toLocaleString("default", { month: "short" });
+          map[label] = (map[label] || 0) + (Number(f.amount) || 0);
         });
+        const trend = Object.keys(map).map((k) => ({ month: k, income: map[k], expense: map[k] * 0.6 }));
+        setTrendData(trend);
+      } else {
+        setTrendData([]);
       }
-    };
 
-    fetchOverview();
-    return () => {
-      mounted = false;
-    };
-  }, [setMessage]);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      setMessage({ type: "error", text: "Could not build admin overview from local data." });
+    }
+  }, [data, setMessage]);
 
-  const { students, calculateRisk } = useContext(DataContext);
+  const students = Array.isArray(dataCtx?.students) ? dataCtx.students : [];
+  const calculateRisk = typeof dataCtx?.calculateRisk === "function" ? dataCtx.calculateRisk : () => "Safe";
 
-// group by course
-const riskByCourse = useMemo(() => {
-  const map = {};
-  students.forEach((s) => {
-    const course = s.course || "Unknown";
-    const risk = calculateRisk(s);
-    if (!map[course]) map[course] = { course, safe: 0, risk: 0 };
-    if (risk === "At-Risk") map[course].risk += 1;
-    else map[course].safe += 1;
-  });
-  return Object.values(map);
-}, [students, calculateRisk]);
+  // group by course
+  const riskByCourse = useMemo(() => {
+    const map = {};
+    students.forEach((s) => {
+      const course = s.course || "Unknown";
+      const risk = calculateRisk(s);
+      if (!map[course]) map[course] = { course, safe: 0, risk: 0 };
+      if (risk === "At-Risk") map[course].risk += 1;
+      else map[course].safe += 1;
+    });
+    return Object.values(map);
+  }, [students, calculateRisk]);
 
   return (
     <motion.div
@@ -191,7 +170,7 @@ const riskByCourse = useMemo(() => {
         ) : (
           <p className="text-gray-500 mt-2">No at-risk students detected.</p>
         )}
-      </div>;
+      </div>
 
       <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow mt-6">
       <h3 className="text-lg font-semibold flex items-center gap-2 mb-4 text-primary">

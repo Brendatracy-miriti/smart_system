@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -15,7 +15,6 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -105,7 +104,7 @@ export default function Signup() {
         animate="show"
         variants={rightVariants}
         transition={{ duration: 0.7 }}
-        className="w-full md:w-2/5 flex items-center justify-center bg-[#0f172a] text-white overflow-y-auto py-10"
+        className="w-full md:w-2/5 flex flex-col bg-[#0f172a] text-white overflow-y-auto py-10"
       >
         <div className="max-w-md w-full mx-auto px-10">
           <h1 className="text-3xl font-bold mb-2 text-center">Create Account</h1>
@@ -210,7 +209,7 @@ export default function Signup() {
                 <option value="student">Student</option>
                 <option value="parent">Parent</option>
                 <option value="teacher">Teacher</option>
-                <option value="teacher">Admin</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
 

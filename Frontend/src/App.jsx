@@ -20,6 +20,7 @@ import Funds from "./pages/Dashboard/Admin/Funds";
 import Notifications from "./pages/Dashboard/Admin/Notifications";
 import AcademicInsights from "./pages/Dashboard/Admin/AcademicInsights";
 import AdminSettings from "./pages/Dashboard/Admin/Settings";
+import AdminSidebar from "./pages/Dashboard/Admin/Sidebar";
 
 // Teacher
 import TeacherSidebar from "./pages/Dashboard/Teacher/Sidebar";
@@ -58,12 +59,15 @@ function AnimatedRoutes() {
         <Route path="/signup" element={<Signup />} />
 
         {/* Admin */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<Users />} />
-        <Route path="/admin/funds" element={<Funds />} />
-        <Route path="/admin/notifications" element={<Notifications />} />
-        <Route path="/admin/academic-insights" element={<AcademicInsights />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/*" element={<AdminSidebar />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<Users />} />
+          <Route path="funds" element={<Funds />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="academic-insights" element={<AcademicInsights />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
 
         {/* Teacher */}
         <Route path="/teacher/*" element={<TeacherSidebar />}>
