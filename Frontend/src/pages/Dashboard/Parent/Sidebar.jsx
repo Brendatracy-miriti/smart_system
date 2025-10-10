@@ -17,7 +17,17 @@ export default function ParentSidebar() {
   return (
     <div className="flex min-h-screen">
       <aside className={`${open ? "w-64" : "w-20"} bg-white dark:bg-[#1F2937] p-4`}>
-        <button onClick={()=>setOpen(!open)} className="mb-4 text-gray-500">{open ? "◀" : "▶"}</button>
+        <div className="flex items-center gap-2 mb-4">
+          <button
+            onClick={() => setOpen((s) => !s)}
+            aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+            className="text-gray-500 dark:text-gray-300 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+            title={open ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            <Menu size={22} />
+          </button>
+          {open && <span className="text-lg font-bold text-primary ml-2">Edu-Guardian</span>}
+        </div>
         <nav className="space-y-2">
           {links.map(l=> <NavLink key={l.to} to={l.to} className={({isActive})=>`block px-3 py-2 rounded ${isActive ? "bg-primary text-white" : "text-gray-600"}`}>{open ? l.label : l.label.charAt(0)}</NavLink>)}
         </nav>

@@ -19,8 +19,9 @@ export default function StudentDashboard() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("eg_current_user"));
     if (!user) return;
+    // Only run when data is available and stable
+    if (!assignments.length && !submissions.length && !grades.length && !timetables.length) return;
 
-    // build profile object from local user and live data
     const userAssignments = assignments.filter(a => a.course === user.course);
     const completedCount = submissions.filter(s => s.userEmail === user.email).length;
     const myGrades = grades.filter(g => g.studentEmail === user.email);
@@ -42,8 +43,9 @@ export default function StudentDashboard() {
       id: t.id, subject: t.subject, time: `${t.day}, ${t.time}`
     }));
     setUpcoming(myLessons);
-
-  }, [timetables, assignments, submissions, grades]);
+    // Only re-run if user or data length changes
+    // eslint-disable-next-line
+  }, [JSON.stringify(assignments.map(a=>a.id)), JSON.stringify(submissions.map(s=>s.id)), JSON.stringify(grades.map(g=>g.id)), JSON.stringify(timetables.map(t=>t.id))]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="space-y-6">

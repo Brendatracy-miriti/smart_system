@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sun, Moon, LogOut, Home, BookOpen, Award, Calendar, Settings } from "lucide-react";
+import { Sun, Moon, LogOut, Home, BookOpen, Award, Calendar, Settings, Menu } from "lucide-react";
 import { useTheme } from "../../../context/ThemeContext";
 
 export default function StudentSidebar() {
@@ -28,12 +28,17 @@ export default function StudentSidebar() {
         } bg-white dark:bg-[#1F2937] p-4 shadow-lg flex flex-col justify-between transition-all`}
       >
         <div>
-          <button
-            onClick={() => setOpen(!open)}
-            className="text-gray-500 dark:text-gray-300 mb-6"
-          >
-            {open ? "◀" : "▶"}
-          </button>
+          <div className="flex items-center gap-2 mb-6">
+            <button
+              onClick={() => setOpen((s) => !s)}
+              aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+              className="text-gray-500 dark:text-gray-300 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              title={open ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              <Menu size={22} />
+            </button>
+            {open && <span className="text-lg font-bold text-primary ml-2">Edu-Guardian</span>}
+          </div>
           <nav className="space-y-2">
             {links.map((link) => (
               <NavLink

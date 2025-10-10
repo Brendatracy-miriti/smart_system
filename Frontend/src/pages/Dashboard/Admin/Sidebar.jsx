@@ -58,18 +58,18 @@ export default function Sidebar() {
             collapsed ? "w-20" : "w-64"
           }`}
         >
-          <div className="p-4 flex items-center justify-between">
-            <h1 className={`text-xl font-bold text-primary transition-opacity ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-              Edu-Guardian
-            </h1>
+          <div className="p-4 flex items-center gap-2">
             <button
               onClick={() => setCollapsed((s) => !s)}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               className="text-gray-600 dark:text-gray-200 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 z-50"
               title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+              <Menu size={22} />
             </button>
+            {!collapsed && (
+              <h1 className="text-xl font-bold text-primary ml-2">Edu-Guardian</h1>
+            )}
           </div>
 
           <nav className="flex-1 px-3 space-y-1">

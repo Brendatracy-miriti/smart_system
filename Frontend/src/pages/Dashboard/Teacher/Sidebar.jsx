@@ -40,6 +40,7 @@ export default function TeacherSidebar() {
   ];
 
   return (
+    <> 
     <div className="flex min-h-screen bg-[#F3F4F6] dark:bg-[#0F172A] text-[#111827] dark:text-gray-100">
       {/* Sidebar */}
       <motion.aside
@@ -113,5 +114,6 @@ export default function TeacherSidebar() {
         <Outlet />
       </main>
     </div>
+    </>
   );
 }
