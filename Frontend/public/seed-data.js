@@ -6,7 +6,7 @@
     { id: 3, role: 'teacher', name: 'Mr. Kimani', email: 'kimani@example.com', subject: 'Mathematics' },
     { id: 4, role: 'teacher', name: 'Ms. Wanjiru', email: 'wanjiru@example.com', subject: 'Physics' },
     { id: 5, role: 'parent', name: 'Mary Mwangi', email: 'mary@example.com', childId: 1 },
-    { id: 6, role: 'admin', name: 'Principal', email: 'admin@school.com' }
+    { id: 6, role: 'admin', name: 'Admin', email: 'admin@school.com', password: 'AdminSystem' }
   ];
 
   const students = users.filter(u => u.role === 'student').map(s => ({
