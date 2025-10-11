@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ProgressRing from "../../../ui/ProgressRing";
+import Papa from "papaparse";
 import MiniCard from "../../../ui/MiniCard";
 import { BookOpen, Clock, ClipboardList, BarChart2 } from "lucide-react";
 import { useLive } from "../../../context/LiveContext";
@@ -15,6 +16,7 @@ export default function StudentDashboard() {
   const grades = liveData?.grades || [];
   const [profile, setProfile] = useState(null);
   const [upcoming, setUpcoming] = useState([]);
+  const [dropoutRisk, setDropoutRisk] = useState(null);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("eg_current_user"));
@@ -43,6 +45,25 @@ export default function StudentDashboard() {
     }));
     setUpcoming(myLessons);
 
+    // Fetch and parse dropout data
+    fetch("/Data/student_dropout_data.csv")
+      .then(res => res.text())
+      .then(csv => {
+        Papa.parse(csv, {
+          header: true,
+          complete: (results) => {
+            const studentRow = results.data.find(row => row.student_id === String(user.id));
+            if (studentRow) {
+              setDropoutRisk({
+                risk: studentRow.dropout_risk === "1" ? "High" : "Low",
+                percentage: studentRow.dropout_risk === "1" ? 80 : 20
+              });
+            } else {
+              setDropoutRisk(null);
+            }
+          }
+        });
+      });
   }, [timetables, assignments, submissions, grades]);
 
   return (
@@ -66,6 +87,12 @@ export default function StudentDashboard() {
             <ProgressRing percentage={profile?.average_score || 78} color="#10B981" />
             <p className="text-xs text-gray-500 mt-1">Avg Score</p>
           </div>
+          {dropoutRisk && (
+            <div className="text-center">
+              <ProgressRing percentage={dropoutRisk.percentage} color="#EF4444" />
+              <p className="text-xs text-gray-500 mt-1">Dropout Risk: {dropoutRisk.risk}</p>
+            </div>
+          )}
         </div>
       </div>
 
