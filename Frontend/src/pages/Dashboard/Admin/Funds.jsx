@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useData } from "../../../context/DataContext";
+import { useTheme } from "../../../context/ThemeContext";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 const COLORS = ["#10B981", "#38BDF8", "#1E3A8A", "#F59E0B", "#EF4444"];
@@ -51,21 +52,21 @@ export default function Funds() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="col-span-2 bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+  <div className="col-span-2 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow">
           <h3 className="font-semibold mb-3">Monthly inflows</h3>
           <div style={{ height: 240 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthly}>
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#1E3A8A" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke={theme === 'dark' ? '#9ca3af' : '#374151'} />
+                <YAxis stroke={theme === 'dark' ? '#9ca3af' : '#374151'} />
+                <Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#0b1220' : '#fff', color: theme === 'dark' ? '#f3f4f6' : '#111827' }} />
+                <Bar dataKey="value" fill={theme === 'dark' ? '#38BDF8' : '#1E3A8A'} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow">
           <h3 className="font-semibold mb-3">By source</h3>
           <div style={{ height: 240 }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -75,14 +76,14 @@ export default function Funds() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#0b1220' : '#fff', color: theme === 'dark' ? '#f3f4f6' : '#111827' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <form onSubmit={submit} className="bg-white dark:bg-[#071027] p-4 rounded-2xl shadow space-y-3">
+  <form onSubmit={submit} className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow space-y-3">
         <div className="grid sm:grid-cols-3 gap-3">
           <input placeholder="Source" value={form.source} onChange={(e) => setForm((p) => ({ ...p, source: e.target.value }))} className="p-2 border rounded bg-transparent" />
           <input placeholder="Amount" value={form.amount} onChange={(e) => setForm((p) => ({ ...p, amount: e.target.value }))} className="p-2 border rounded bg-transparent" />
@@ -91,7 +92,7 @@ export default function Funds() {
         <button type="submit" className="px-4 py-2 bg-primary text-white rounded">Add Fund</button>
       </form>
 
-      <div className="bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow">
         <h3 className="font-semibold mb-2">Recent</h3>
         {funds.length ? (
           <ul className="divide-y divide-gray-100 dark:divide-gray-800">

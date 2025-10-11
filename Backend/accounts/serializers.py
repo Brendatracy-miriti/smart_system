@@ -103,17 +103,28 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         Create the appropriate profile based on user type.
         """
         if user.user_type == 'student':
-            Student.objects.create(user=user, grade=grade)
-            
+            student = Student.objects.create(user=user, grade=grade)
+
+            # Link to parent if parent_email provided and parent exists
+            if parent_email:
+                try:
+                    parent_user = User.objects.get(email=parent_email, user_type='parent')
+                    if hasattr(parent_user, 'parent'):
+                        student.parent = parent_user.parent
+                        student.save()
+                except User.DoesNotExist:
+                    # Parent doesn't exist, could create or ignore
+                    pass
+
         elif user.user_type == 'teacher':
             Teacher.objects.create(user=user, subjects=subjects)
-            
+
         elif user.user_type == 'parent':
             Parent.objects.create(user=user)
-            
+
         elif user.user_type == 'admin':
             Admin.objects.create(user=user)
-            
+
         elif user.user_type == 'mentor':
             Mentor.objects.create(user=user, expertise_areas=subjects)
 

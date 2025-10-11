@@ -21,6 +21,7 @@ import Notifications from "./pages/Dashboard/Admin/Notifications";
 import AcademicInsights from "./pages/Dashboard/Admin/AcademicInsights";
 import AdminSettings from "./pages/Dashboard/Admin/Settings";
 import AdminSidebar from "./pages/Dashboard/Admin/Sidebar";
+import SeedStudents from "./pages/Dashboard/Admin/SeedStudents";
 
 // Teacher
 import TeacherSidebar from "./pages/Dashboard/Teacher/Sidebar";
@@ -43,6 +44,10 @@ import Transport from "./pages/Transport/Transport";
 // Student
 import StudentSidebar from "./pages/Dashboard/Student/Sidebar";
 import StudentDashboard from "./pages/Dashboard/Student/StudentDashboard";
+import StudentAssignments from "./pages/Dashboard/Student/Assignments";
+import StudentGrades from "./pages/Dashboard/Student/Grades";
+import StudentSettings from "./pages/Dashboard/Student/Settings";
+import StudentCourses from "./pages/Dashboard/Student/Courses";
 
 
 // UI / Extras
@@ -67,6 +72,7 @@ function AnimatedRoutes() {
           <Route path="users" element={<Users />} />
           <Route path="funds" element={<Funds />} />
           <Route path="notifications" element={<Notifications />} />
+          <Route path="seed-students" element={<SeedStudents />} />
           <Route path="academic-insights" element={<AcademicInsights />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
@@ -95,6 +101,10 @@ function AnimatedRoutes() {
         {/* Student */}
         <Route path="/student/*" element={<StudentSidebar />}> 
           <Route index element={<StudentDashboard />} />
+          <Route path="assignments" element={<StudentAssignments />} />
+          <Route path="grades" element={<StudentGrades />} />
+          <Route path="courses" element={<StudentCourses />} />
+          <Route path="settings" element={<StudentSettings />} />
           <Route path="mentorship" element={<MentorshipList />} />
         </Route>
 

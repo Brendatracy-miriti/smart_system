@@ -139,12 +139,12 @@ export default function Notifications() {
               value={compose.title}
               onChange={(e) => setCompose((s) => ({ ...s, title: e.target.value }))}
               placeholder="Title"
-              className="px-3 py-2 rounded-lg border bg-white dark:bg-[#111827]"
+              className="px-3 py-2 rounded-lg border bg-white dark:bg-gray-800"
             />
             <select
               value={compose.type}
               onChange={(e) => setCompose((s) => ({ ...s, type: e.target.value }))}
-              className="px-2 py-2 rounded-lg border bg-white dark:bg-[#111827]"
+              className="px-2 py-2 rounded-lg border bg-white dark:bg-gray-800"
             >
               <option value="system">System</option>
               <option value="transport">Transport</option>
@@ -180,7 +180,7 @@ export default function Notifications() {
       </div>
 
       {/* Notification list */}
-      <div className="bg-white dark:bg-[#1F2937] rounded-2xl shadow p-5">
+  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-5">
         {loading ? (
           <div className="text-center text-gray-500 dark:text-gray-400 py-6">
             Loading notifications...

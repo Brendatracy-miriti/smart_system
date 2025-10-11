@@ -4,6 +4,7 @@ import UserTable from "../../../ui/UserTable";
 import UserFormModal from "../../../ui/UserFormModal";
 import { useMessage } from "../../../hooks/useMessage";
 import { useData } from "../../../context/DataContext";
+import { updateUser as updateLocalUser } from "../../../utils/localData";
 
 export default function Users() {
   const { setMessage } = useMessage();
@@ -11,13 +12,22 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [showInactive, setShowInactive] = useState(false);
+  // persist showInactive preference
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem("admin_show_inactive");
+      if (v !== null) setShowInactive(v === "true");
+    } catch (e) {}
+  }, []);
   const { data, addUser, updateUser, setData } = useData();
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       // load from DataContext/localStorage
-      const local = Array.isArray(data?.users) ? data.users : [];
+      let local = Array.isArray(data?.users) ? data.users : [];
+      if (!showInactive) local = local.filter((u) => u.is_active !== false);
       setUsers(local);
       setLoading(false);
     } catch (err) {
@@ -61,6 +71,21 @@ export default function Users() {
     }
   };
 
+  const toggleActive = (u) => {
+    try {
+      const newVal = !u.is_active;
+      // update in DataContext
+      updateUser(u.id, { is_active: newVal });
+      // update localData for compatibility
+      try { updateLocalUser(u.id, { is_active: newVal }); } catch (e) {}
+      setMessage({ type: "success", text: `User ${newVal ? "activated" : "deactivated"}` });
+      // refresh list
+      fetchUsers();
+    } catch (e) {
+      setMessage({ type: "error", text: "Failed to update user status." });
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -77,12 +102,18 @@ export default function Users() {
           <h2 className="text-2xl font-bold text-primary">User Management</h2>
           <p className="text-gray-500 dark:text-gray-400">Manage all users in the system.</p>
         </div>
-        <button
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <input type="checkbox" checked={showInactive} onChange={(e) => { setShowInactive(e.target.checked); try { localStorage.setItem("admin_show_inactive", String(e.target.checked)); } catch (err) {} fetchUsers(); }} />
+            Show inactive
+          </label>
+          <button
           onClick={() => setShowModal(true)}
           className="py-2 px-4 rounded-lg bg-primary text-white hover:bg-accent transition"
         >
           + Add User
         </button>
+        </div>
       </div>
 
       <UserTable
@@ -93,6 +124,7 @@ export default function Users() {
           setShowModal(true);
         }}
         onDelete={handleDelete}
+        onToggleActive={toggleActive}
       />
 
       <UserFormModal
