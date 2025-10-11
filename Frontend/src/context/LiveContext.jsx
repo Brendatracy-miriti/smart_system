@@ -63,19 +63,32 @@ export const LiveProvider = ({ children }) => {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
+  // Provide both a flattened shape (so consumers can do `const { timetables } = useLive()`)
+  // and the raw `data` object for advanced access.
+  const refreshFn = () => {
+    setData({
+      users: JSON.parse(localStorage.getItem("users")) || getUsers() || [],
+      students: JSON.parse(localStorage.getItem("students")) || getStudents() || [],
+      parents: JSON.parse(localStorage.getItem("parents")) || getParents() || [],
+      assignments: JSON.parse(localStorage.getItem("assignments")) || [],
+      grades: JSON.parse(localStorage.getItem("grades")) || [],
+      attendance: JSON.parse(localStorage.getItem("attendance")) || [],
+      timetable: JSON.parse(localStorage.getItem("timetable")) || [],
+      messages: JSON.parse(localStorage.getItem("messages")) || [],
+    });
+  };
+
   return (
-    <LiveContext.Provider value={{ data, setData, refresh: () => {
-      setData({
-        users: JSON.parse(localStorage.getItem("users")) || getUsers() || [],
-        students: JSON.parse(localStorage.getItem("students")) || getStudents() || [],
-        parents: JSON.parse(localStorage.getItem("parents")) || getParents() || [],
-        assignments: JSON.parse(localStorage.getItem("assignments")) || [],
-        grades: JSON.parse(localStorage.getItem("grades")) || [],
-        attendance: JSON.parse(localStorage.getItem("attendance")) || [],
-        timetable: JSON.parse(localStorage.getItem("timetable")) || [],
-        messages: JSON.parse(localStorage.getItem("messages")) || [],
-      });
-    } }}>{children}</LiveContext.Provider>
+    <LiveContext.Provider value={{
+      // flattened keys for convenience
+      ...(data || {}),
+      // full access
+      data,
+      setData,
+      refresh: refreshFn,
+    }}>
+      {children}
+    </LiveContext.Provider>
   );
 };
 
