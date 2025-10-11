@@ -1,6 +1,6 @@
-// src/pages/Dashboard/Student/StudentDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Papa from "papaparse";
 import ProgressRing from "../../../ui/ProgressRing";
 import MiniCard from "../../../ui/MiniCard";
 import { BookOpen, Clock, ClipboardList, BarChart2 } from "lucide-react";
@@ -45,17 +45,26 @@ export default function StudentDashboard() {
     }));
     setUpcoming(myLessons);
 
-    // Mock dropout risk since no backend endpoint
-    // In future, fetch from /accounts/student-risk/{id}/
-    setDropoutRisk({
-      risk: "Low",
-      percentage: 20
-    });
-  }, [user, timetables, assignments, submissions, grades]);
-
-  if (!user) {
-    return <div className="flex items-center justify-center h-64">Please log in to view dashboard.</div>;
-  }
+    // Fetch and parse dropout data
+    fetch("/Data/student_dropout_data.csv")
+      .then(res => res.text())
+      .then(csv => {
+        Papa.parse(csv, {
+          header: true,
+          complete: (results) => {
+            const studentRow = results.data.find(row => row.student_id === String(user.id));
+            if (studentRow) {
+              setDropoutRisk({
+                risk: studentRow.dropout_risk === "1" ? "High" : "Low",
+                percentage: studentRow.dropout_risk === "1" ? 80 : 20
+              });
+            } else {
+              setDropoutRisk(null);
+            }
+          }
+        });
+      });
+  }, [timetables, assignments, submissions, grades]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="space-y-6">
