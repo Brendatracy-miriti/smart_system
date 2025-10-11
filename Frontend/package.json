@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-pwa-assets": "pwa-assets-generator --preset minimal public/Faviconss.png"
+    "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/Faviconss.png"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.7",
@@ -22,6 +22,7 @@
     "react-dom": "^19.1.1",
     "react-dropzone": "^14.3.8",
     "react-icons": "^5.5.0",
+    "react-is": "^19.2.0",
     "react-router-dom": "^7.9.3",
     "recharts": "^3.2.1",
     "uuid": "^13.0.0"

@@ -11,6 +11,11 @@ export default function ProfileSettings() {
     email: currentUser?.email || "",
     avatar: currentUser?.avatar || "",
   });
+  const [passwords, setPasswords] = useState({
+    current: "",
+    newPassword: "",
+    confirm: "",
+  });
 
   const handleFile = (e) => {
     const file = e.target.files[0];
@@ -28,6 +33,22 @@ export default function ProfileSettings() {
     const updated = { ...currentUser, ...form };
     localStorage.setItem("eg_current_user", JSON.stringify(updated));
     alert("Profile updated successfully!");
+  };
+
+  const handleChangePassword = () => {
+    if (!currentUser) return alert("Not logged in");
+    if (passwords.newPassword.length < 4) return alert("New password must be at least 4 characters");
+    if (passwords.newPassword !== passwords.confirm) return alert("New password and confirm do not match");
+    // verify current password
+    if (currentUser.password && passwords.current !== currentUser.password) return alert("Current password is incorrect");
+
+    // update in DataContext users and eg_current_user
+    updateUser(currentUser.id, { password: passwords.newPassword });
+    const updated = { ...currentUser, password: passwords.newPassword };
+    localStorage.setItem("eg_current_user", JSON.stringify(updated));
+    // clear fields
+    setPasswords({ current: "", newPassword: "", confirm: "" });
+    alert("Password changed successfully");
   };
 
   return (
@@ -74,6 +95,37 @@ export default function ProfileSettings() {
         >
           Save Changes
         </button>
+      </div>
+
+      <div className="mt-6 bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+        <h3 className="text-lg font-semibold">Change Password</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Update your account password.</p>
+        <div className="space-y-3 mt-3">
+          <input
+            type="password"
+            placeholder="Current password"
+            value={passwords.current}
+            onChange={(e) => setPasswords((p) => ({ ...p, current: e.target.value }))}
+            className="w-full p-2 border rounded"
+          />
+          <input
+            type="password"
+            placeholder="New password"
+            value={passwords.newPassword}
+            onChange={(e) => setPasswords((p) => ({ ...p, newPassword: e.target.value }))}
+            className="w-full p-2 border rounded"
+          />
+          <input
+            type="password"
+            placeholder="Confirm new password"
+            value={passwords.confirm}
+            onChange={(e) => setPasswords((p) => ({ ...p, confirm: e.target.value }))}
+            className="w-full p-2 border rounded"
+          />
+          <button onClick={handleChangePassword} className="bg-primary text-white px-4 py-2 rounded">
+            Change Password
+          </button>
+        </div>
       </div>
     </motion.div>
   );
