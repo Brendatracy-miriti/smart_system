@@ -27,10 +27,11 @@ export const keys = {
 // users
 export const getUsers = () => read(keys.USERS);
 export const addUser = (u) => {
+  const user = { is_active: true, ...u };
   const all = getUsers();
-  all.unshift(u);
+  all.unshift(user);
   write(keys.USERS, all);
-  return u;
+  return user;
 };
 export const updateUser = (id, patch) => {
   const all = getUsers().map((x) => (x.id === id ? { ...x, ...patch } : x));

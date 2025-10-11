@@ -66,10 +66,13 @@ export default function UserTable({ users, onEdit, onDelete, loading }) {
                   </button>
                   <button
                     onClick={() => onDelete(u)}
-                    className="text-red-500 hover:text-red-600"
+                    className="text-red-500 hover:text-red-600 mr-3"
                   >
                     <Trash2 size={18} />
                   </button>
+                  {typeof onToggleActive === 'function' && (
+                    <button onClick={() => onToggleActive(u)} className="px-2 py-1 rounded text-sm bg-gray-100 dark:bg-gray-700">{u.is_active ? 'Deactivate' : 'Activate'}</button>
+                  )}
                 </td>
               </tr>
             ))}

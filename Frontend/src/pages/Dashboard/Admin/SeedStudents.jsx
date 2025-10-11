@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../../../context/DataContext';
-import { addStudent } from '../../../utils/localData';
+import { addStudent, addUser } from '../../../utils/localData';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function SeedStudents() {
@@ -15,15 +15,19 @@ export default function SeedStudents() {
       setMessage('Provide both name and admission number');
       return;
     }
+    // create a linked user and student profile
+    const userId = uuidv4();
+    const user = addUser({ id: userId, name, email: `${admission}@eg.test`, password: '1234', role: 'student' });
     const student = {
       id: uuidv4(),
-      userId: uuidv4(),
+      userId,
       name,
       admission_number: admission,
       course,
       attendance_rate: 0,
       average_score: 0,
       courses_count: course ? 1 : 0,
+      email: user.email,
     };
     addStudent(student);
     setMessage('Student seeded');

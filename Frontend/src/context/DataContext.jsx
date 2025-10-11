@@ -26,7 +26,11 @@ export const DataProvider = ({ children }) => {
   }, [data]);
 
   // helpers
-  const addUser = (user) => setData((p) => ({ ...p, users: [...p.users, user] }));
+  const addUser = (user) => {
+    const u = { is_active: true, ...user };
+    setData((p) => ({ ...p, users: [...p.users, u] }));
+    return u;
+  };
 
   const updateUser = (id, patch) =>
     setData((p) => ({
