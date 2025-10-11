@@ -47,22 +47,52 @@ export default function StudentDashboard() {
 
     // Fetch and parse dropout data
     fetch("/Data/student_dropout_data.csv")
-      .then(res => res.text())
+      .then(res => {
+        if (!res.ok) throw new Error(`CSV fetch failed: ${res.status} ${res.statusText}`);
+        return res.text();
+      })
       .then(csv => {
         Papa.parse(csv, {
           header: true,
+          skipEmptyLines: true,
+          transformHeader: h => h && h.trim(),
+          transform: v => (typeof v === 'string' ? v.trim() : v),
           complete: (results) => {
-            const studentRow = results.data.find(row => row.student_id === String(user.id));
-            if (studentRow) {
-              setDropoutRisk({
-                risk: studentRow.dropout_risk === "1" ? "High" : "Low",
-                percentage: studentRow.dropout_risk === "1" ? 80 : 20
-              });
-            } else {
+            try {
+              console.debug('Parsed dropout CSV rows:', results.data.length);
+              // try multiple matching strategies
+              let studentRow = results.data.find(row => String(row.student_id) === String(user.id));
+              if (!studentRow && user.email) {
+                studentRow = results.data.find(row => String(row.email).toLowerCase() === String(user.email).toLowerCase());
+              }
+              if (!studentRow) {
+                // try matching by numeric id or by name if available
+                studentRow = results.data.find(row => String(row.id) === String(user.id) || String(row.student_id) === String(user.student_id));
+              }
+
+              if (studentRow) {
+                setDropoutRisk({
+                  risk: (String(studentRow.dropout_risk) === "1" || String(studentRow.dropout_risk).toLowerCase() === 'high') ? "High" : "Low",
+                  percentage: (String(studentRow.dropout_risk) === "1" || String(studentRow.dropout_risk).toLowerCase() === 'high') ? 80 : 20
+                });
+              } else {
+                console.warn('No matching student row found in dropout CSV for user', user);
+                setDropoutRisk(null);
+              }
+            } catch (err) {
+              console.error('Error handling parsed dropout CSV', err);
               setDropoutRisk(null);
             }
+          },
+          error: (err) => {
+            console.error('Papa parse error for dropout CSV', err);
+            setDropoutRisk(null);
           }
         });
+      })
+      .catch(err => {
+        console.error('Failed to fetch/parse dropout CSV', err);
+        setDropoutRisk(null);
       });
   }, [timetables, assignments, submissions, grades]);
 
