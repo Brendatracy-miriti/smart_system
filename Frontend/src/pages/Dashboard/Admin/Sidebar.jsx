@@ -37,7 +37,7 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-[#F3F4F6]">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Sidebar */}
       <motion.aside
         animate={{ width: open ? 230 : 70 }}
