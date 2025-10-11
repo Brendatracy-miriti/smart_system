@@ -37,9 +37,6 @@ export const LiveProvider = ({ children }) => {
     } catch (e) {
       // ignore storage errors
     }
-
-    // notify other parts of the app that localStorage changed
-    window.dispatchEvent(new Event("storage"));
   }, [data]);
 
   // listen for storage events (or synthetic storage events dispatched elsewhere) so we refresh

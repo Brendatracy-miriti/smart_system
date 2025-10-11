@@ -44,6 +44,10 @@ import Transport from "./pages/Transport/Transport";
 // Student
 import StudentSidebar from "./pages/Dashboard/Student/Sidebar";
 import StudentDashboard from "./pages/Dashboard/Student/StudentDashboard";
+import StudentAssignments from "./pages/Dashboard/Student/Assignments";
+import StudentGrades from "./pages/Dashboard/Student/Grades";
+import StudentSettings from "./pages/Dashboard/Student/Settings";
+import StudentCourses from "./pages/Dashboard/Student/Courses";
 
 
 // UI / Extras
@@ -97,6 +101,10 @@ function AnimatedRoutes() {
         {/* Student */}
         <Route path="/student/*" element={<StudentSidebar />}> 
           <Route index element={<StudentDashboard />} />
+          <Route path="assignments" element={<StudentAssignments />} />
+          <Route path="grades" element={<StudentGrades />} />
+          <Route path="courses" element={<StudentCourses />} />
+          <Route path="settings" element={<StudentSettings />} />
           <Route path="mentorship" element={<MentorshipList />} />
         </Route>
 

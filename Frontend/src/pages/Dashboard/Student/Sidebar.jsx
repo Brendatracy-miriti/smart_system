@@ -14,23 +14,23 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "../../../context/ThemeContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function StudentSidebar() {
   const [open, setOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    navigate("/login");
+    logout();
   };
 
   const links = [
     { to: "/student", label: "Dashboard", icon: Home },
     { to: "/student/assignments", label: "Assignments", icon: BookOpen },
     { to: "/student/grades", label: "Grades", icon: Award },
-    { to: "/student/timetable", label: "Timetable", icon: Calendar },
+    { to: "/student/courses", label: "Courses", icon: Calendar },
     { to: "/student/settings", label: "Settings", icon: Settings },
   ];
 

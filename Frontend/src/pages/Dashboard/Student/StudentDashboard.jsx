@@ -2,15 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ProgressRing from "../../../ui/ProgressRing";
-import Papa from "papaparse";
 import MiniCard from "../../../ui/MiniCard";
 import { BookOpen, Clock, ClipboardList, BarChart2 } from "lucide-react";
 import { useLive } from "../../../context/LiveContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function StudentDashboard() {
+  const { current: user } = useAuth();
   const liveData = useLive();
   // Defensive: fallback to empty arrays if context is not ready
-  const timetables = liveData?.timetables || [];
+  const timetables = liveData?.timetable || [];
   const assignments = liveData?.assignments || [];
   const submissions = liveData?.submissions || [];
   const grades = liveData?.grades || [];
@@ -19,10 +20,9 @@ export default function StudentDashboard() {
   const [dropoutRisk, setDropoutRisk] = useState(null);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("eg_current_user"));
     if (!user) return;
 
-    // build profile object from local user and live data
+    // build profile object from local user data
     const userAssignments = assignments.filter(a => a.course === user.course);
     const completedCount = submissions.filter(s => s.userEmail === user.email).length;
     const myGrades = grades.filter(g => g.studentEmail === user.email);
@@ -35,7 +35,7 @@ export default function StudentDashboard() {
       level: user.level || "Undergraduate",
       attendance_rate: user.attendance_rate || 85,
       average_score: user.average_score || 78,
-      courses_count: user.courses_count || (user.course ? 1 : 0),
+      courses_count: user.courses_count || 1,
       completed_assignments: completedCount,
       gpa,
     });
@@ -45,26 +45,17 @@ export default function StudentDashboard() {
     }));
     setUpcoming(myLessons);
 
-    // Fetch and parse dropout data
-    fetch("/Data/student_dropout_data.csv")
-      .then(res => res.text())
-      .then(csv => {
-        Papa.parse(csv, {
-          header: true,
-          complete: (results) => {
-            const studentRow = results.data.find(row => row.student_id === String(user.id));
-            if (studentRow) {
-              setDropoutRisk({
-                risk: studentRow.dropout_risk === "1" ? "High" : "Low",
-                percentage: studentRow.dropout_risk === "1" ? 80 : 20
-              });
-            } else {
-              setDropoutRisk(null);
-            }
-          }
-        });
-      });
-  }, [timetables, assignments, submissions, grades]);
+    // Mock dropout risk since no backend endpoint
+    // In future, fetch from /accounts/student-risk/{id}/
+    setDropoutRisk({
+      risk: "Low",
+      percentage: 20
+    });
+  }, [user, timetables, assignments, submissions, grades]);
+
+  if (!user) {
+    return <div className="flex items-center justify-center h-64">Please log in to view dashboard.</div>;
+  }
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="space-y-6">
@@ -139,13 +130,7 @@ export default function StudentDashboard() {
         ) : (<p className="text-gray-500">No upcoming lessons for today.</p>)}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MiniCard title="Assignments" description="View pending work" icon={ClipboardList} color="blue" />
-        <MiniCard title="Grades" description="Check term results" icon={BarChart2} color="green" />
-        <MiniCard title="Timetable" description="See daily schedule" icon={Clock} color="purple" />
-      </div>
-
-            {/* QUICK ACCESS */}
+      {/* QUICK ACCESS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MiniCard
           title="Assignments"
