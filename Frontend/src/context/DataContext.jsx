@@ -6,23 +6,43 @@ export { DataContext };
 
 export const DataProvider = ({ children }) => {
   const [data, setData] = useState({
-    users: JSON.parse(localStorage.getItem("users") || "[]"),
-    assignments: JSON.parse(localStorage.getItem("assignments") || "[]"),
-    submissions: JSON.parse(localStorage.getItem("submissions") || "[]"),
-    buses: JSON.parse(localStorage.getItem("buses") || "[]"),
+    users: JSON.parse(localStorage.getItem("users") || localStorage.getItem("eg_users") || "[]"),
+    assignments: JSON.parse(localStorage.getItem("assignments") || localStorage.getItem("eg_assignments") || "[]"),
+    submissions: JSON.parse(localStorage.getItem("submissions") || localStorage.getItem("eg_submissions") || "[]"),
+    buses: JSON.parse(localStorage.getItem("buses") || localStorage.getItem("eg_transport") || "[]"),
     funds: JSON.parse(localStorage.getItem("funds") || "[]"),
-    mentorships: JSON.parse(localStorage.getItem("mentorships") || "[]"),
-    messages: JSON.parse(localStorage.getItem("messages") || "[]"),
-    timetable: JSON.parse(localStorage.getItem("timetable") || "[]"),
-    attendance: JSON.parse(localStorage.getItem("attendance") || "[]"),
-    grades: JSON.parse(localStorage.getItem("grades") || "[]"),
+    mentorships: JSON.parse(localStorage.getItem("mentorships") || localStorage.getItem("eg_mentorships") || "[]"),
+    messages: JSON.parse(localStorage.getItem("messages") || localStorage.getItem("eg_notifications") || "[]"),
+    timetable: JSON.parse(localStorage.getItem("timetable") || localStorage.getItem("eg_timetables") || "[]"),
+    attendance: JSON.parse(localStorage.getItem("attendance") || localStorage.getItem("eg_attendance") || "[]"),
+    grades: JSON.parse(localStorage.getItem("grades") || localStorage.getItem("eg_grades") || "[]"),
   });
 
   useEffect(() => {
-    Object.entries(data).forEach(([k, v]) => {
-      localStorage.setItem(k, JSON.stringify(v || []));
-    });
-    window.dispatchEvent(new Event("storage"));
+    try {
+      // persist canonical keys
+      Object.entries(data).forEach(([k, v]) => {
+        localStorage.setItem(k, JSON.stringify(v || []));
+      });
+      // persist eg_ prefixed keys for compatibility with utils/localData.js
+      try {
+        localStorage.setItem("eg_users", JSON.stringify(data.users || []));
+        localStorage.setItem("eg_students", JSON.stringify(data.students || [] || []));
+        localStorage.setItem("eg_parents", JSON.stringify(data.parents || []));
+        localStorage.setItem("eg_assignments", JSON.stringify(data.assignments || []));
+        localStorage.setItem("eg_submissions", JSON.stringify(data.submissions || []));
+        localStorage.setItem("eg_transport", JSON.stringify(data.buses || []));
+        localStorage.setItem("eg_notifications", JSON.stringify(data.messages || []));
+        localStorage.setItem("eg_timetables", JSON.stringify(data.timetable || []));
+        localStorage.setItem("eg_attendance", JSON.stringify(data.attendance || []));
+        localStorage.setItem("eg_grades", JSON.stringify(data.grades || []));
+      } catch (e) {
+        // ignore eg_ write errors
+      }
+      window.dispatchEvent(new Event("storage"));
+    } catch (err) {
+      // ignore storage errors
+    }
   }, [data]);
 
   // helpers
@@ -41,6 +61,8 @@ export const DataProvider = ({ children }) => {
   const addAssignment = (a) => setData((p) => ({ ...p, assignments: [...p.assignments, a] }));
 
   const addSubmission = (s) => setData((p) => ({ ...p, submissions: [...p.submissions, s] }));
+
+  const addMessage = (m) => setData((p) => ({ ...p, messages: [...p.messages, m] }));
 
   const addBus = (b) => setData((p) => ({ ...p, buses: [...p.buses, b] }));
 
@@ -64,21 +86,24 @@ export const DataProvider = ({ children }) => {
   const requestMentorship = (studentId, teacherId) =>
     setData((p) => ({ ...p, mentorships: [...p.mentorships, { id: Date.now(), studentId, teacherId, status: "pending", createdAt: new Date().toISOString() }] }));
 
+  const addMentorshipSession = (session) =>
+    setData((p) => ({ ...p, mentorships: [...p.mentorships, session] }));
+
   const updateMentorshipStatus = (id, status) =>
     setData((p) => ({ ...p, mentorships: p.mentorships.map((m) => (m.id === id ? { ...m, status } : m)) }));
 
   const refresh = () =>
     setData({
-      users: JSON.parse(localStorage.getItem("users") || "[]"),
-      assignments: JSON.parse(localStorage.getItem("assignments") || "[]"),
-      submissions: JSON.parse(localStorage.getItem("submissions") || "[]"),
-      buses: JSON.parse(localStorage.getItem("buses") || "[]"),
+      users: JSON.parse(localStorage.getItem("users") || localStorage.getItem("eg_users") || "[]"),
+      assignments: JSON.parse(localStorage.getItem("assignments") || localStorage.getItem("eg_assignments") || "[]"),
+      submissions: JSON.parse(localStorage.getItem("submissions") || localStorage.getItem("eg_submissions") || "[]"),
+      buses: JSON.parse(localStorage.getItem("buses") || localStorage.getItem("eg_transport") || "[]"),
       funds: JSON.parse(localStorage.getItem("funds") || "[]"),
-      mentorships: JSON.parse(localStorage.getItem("mentorships") || "[]"),
-      messages: JSON.parse(localStorage.getItem("messages") || "[]"),
-      timetable: JSON.parse(localStorage.getItem("timetable") || "[]"),
-      attendance: JSON.parse(localStorage.getItem("attendance") || "[]"),
-      grades: JSON.parse(localStorage.getItem("grades") || "[]"),
+      mentorships: JSON.parse(localStorage.getItem("mentorships") || localStorage.getItem("eg_mentorships") || "[]"),
+      messages: JSON.parse(localStorage.getItem("messages") || localStorage.getItem("eg_notifications") || "[]"),
+      timetable: JSON.parse(localStorage.getItem("timetable") || localStorage.getItem("eg_timetables") || "[]"),
+      attendance: JSON.parse(localStorage.getItem("attendance") || localStorage.getItem("eg_attendance") || "[]"),
+      grades: JSON.parse(localStorage.getItem("grades") || localStorage.getItem("eg_grades") || "[]"),
     });
 
   // Risk calculation helpers

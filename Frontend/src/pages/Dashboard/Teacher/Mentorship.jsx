@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Users, MessageCircle, Heart } from "lucide-react";
+import { useData } from "../../../context/DataContext";
 
 export default function Mentorship() {
-  const [sessions, setSessions] = useState([]);
+  const { data, addMentorshipSession } = useData();
+  const [sessions, setSessions] = useState(data.mentorships || []);
   const [topic, setTopic] = useState("");
   const [note, setNote] = useState("");
 
   const addSession = (e) => {
     e.preventDefault();
     if (!topic) return;
-    setSessions([
-      ...sessions,
-      { id: Date.now(), topic, note, date: new Date().toLocaleDateString() },
-    ]);
+    const s = { id: Date.now(), topic, note, date: new Date().toLocaleDateString() };
+    setSessions([...sessions, s]);
+    addMentorshipSession(s);
+    window.dispatchEvent(new Event("storage"));
     setTopic("");
     setNote("");
   };

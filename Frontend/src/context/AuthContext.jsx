@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { addUser, findUserByEmail } from "../utils/localData";
+import { addUser, findUserByEmail, getUsers } from "../utils/localData";
 
 const AuthContext = createContext();
 
@@ -27,15 +27,22 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async ({ identifier, password }) => {
-    // Find user by email or username
-    const user = findUserByEmail(identifier);
+    // Find user by email or name (case-insensitive)
+    if (!identifier) throw new Error("Invalid credentials");
+    const id = String(identifier).trim();
+    let user = findUserByEmail(id);
+    if (!user) {
+      const lower = id.toLowerCase();
+      const all = getUsers();
+      user = all.find((u) => (u.email && u.email.toLowerCase() === lower) || (u.name && u.name.toLowerCase() === lower));
+    }
+
     if (user && user.password === password) {
       setCurrent(user);
       localStorage.setItem("eg_current_user", JSON.stringify(user));
       return user;
-    } else {
-      throw new Error("Invalid credentials");
     }
+    throw new Error("Invalid credentials");
   };
 
   const logout = () => {

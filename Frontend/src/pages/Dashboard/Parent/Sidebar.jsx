@@ -29,14 +29,14 @@ export default function ParentSidebar() {
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <motion.aside
         animate={{ width: open ? 256 : 72 }}
         transition={{ duration: 0.25 }}
-        className="bg-white dark:bg-[#1F2937] p-4 flex flex-col"
+        className="bg-[#0f172a] text-white p-4 flex flex-col min-h-screen shadow-lg z-50"
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className={`font-bold text-lg transition-all duration-300 ${!open && "opacity-0 hidden"}`}>
+          <h2 className={`text-white font-bold text-lg transition-all duration-300 ${!open && "opacity-0 hidden"}`}>
             Edu-Guardian
           </h2>
           <button
@@ -47,7 +47,7 @@ export default function ParentSidebar() {
               } catch (e) {}
               setOpen(next);
             }}
-            className="text-gray-600 dark:text-gray-200"
+            className="text-white"
           >
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -59,9 +59,9 @@ export default function ParentSidebar() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded ${
-                  isActive ? "bg-primary text-white" : "text-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#111827]"
-                }`
+                  `flex items-center gap-3 px-3 py-2 rounded ${
+                    isActive ? "bg-[#226eeb] text-white" : "text-gray-200 hover:bg-[#38BDF8]/20"
+                  }`
               }
             >
               <Icon size={18} />
