@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useData } from "../context/DataContext";
+import { getStudents as getLocalStudents } from "../utils/localData";
 import { useMessage } from "../context/MessageContext";
 import loginIllustration from "../assets/login-signup illustration.svg";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -10,6 +12,7 @@ export default function Signup() {
   const { signup } = useAuth();
   const { setMessage } = useMessage();
   const navigate = useNavigate();
+  const { data } = useData();
 
   const [role, setRole] = useState("student");
   const [name, setName] = useState("");
@@ -37,6 +40,32 @@ export default function Signup() {
       setMessage({ type: "info", text: "Admin accounts cannot be created here. Please login using the admin credentials." });
       navigate("/login");
       return;
+    }
+
+    // If parent, ensure the referenced child exists
+    if (role === "parent") {
+      const lookup = (id) => {
+        if (!id) return false;
+        const q = id.trim();
+        // check DataContext users (role=student)
+        try {
+          const ctxStudents = (data && data.users) ? data.users.filter((u) => u.role === "student") : [];
+          if (ctxStudents.some((s) => (s.admission_number && s.admission_number === q) || s.id === q || (s.username && s.username === q))) return true;
+        } catch (e) {}
+
+        // check localData students
+        try {
+          const ls = getLocalStudents();
+          if (ls.some((s) => (s.admission_number && s.admission_number === q) || s.id === q || (s.username && s.username === q))) return true;
+        } catch (e) {}
+
+        return false;
+      };
+
+      if (!lookup(childStudentId)) {
+        setMessage({ type: "error", text: "No Child with that Admission Number" });
+        return;
+      }
     }
 
     try {

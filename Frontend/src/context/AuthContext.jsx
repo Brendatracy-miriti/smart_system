@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
-  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser, ensureAdmin, getUsers
+  addUser, findUserByEmail, addStudent, addParent, addTeacher, updateUser, ensureAdmin, getUsers, getStudents
 } from "../utils/localData";
 
 export const AuthContext = createContext();
@@ -30,7 +30,29 @@ export function AuthProvider({ children }) {
     if (role === "student") {
       addStudent({ id: uuidv4(), userId: user.id, admission_number: extra.admission || "", course: extra.course || "", attendance_rate: 0, average_score: 0, courses_count: extra.course ? 1 : 0, completed_assignments: 0, gpa: null, email });
     } else if (role === "parent") {
-      addParent({ id: uuidv4(), userId: user.id, childStudentId: extra.childStudentId || null, email });
+      // try to resolve the provided child reference (admission number / id / username) to the canonical student id
+      let childId = null;
+      try {
+        const q = (extra.childStudentId || "").toString().trim();
+        if (q) {
+          const students = getStudents();
+          const found = students.find((s) => (s.admission_number && s.admission_number === q) || s.id === q || (s.username && s.username === q) || s.userId === q);
+          if (found) childId = found.id;
+          else {
+            // fallback: check users list for a student user and attempt to find student profile by userId
+            const users = getUsers();
+            const u = users.find((u) => u.role === "student" && ((u.admission_number && u.admission_number === q) || u.id === q || (u.username && u.username === q)));
+            if (u) {
+              const linked = students.find((s) => s.userId === u.id);
+              if (linked) childId = linked.id;
+            }
+          }
+        }
+      } catch (e) {
+        // ignore resolution errors - we'll store null if not found
+      }
+
+      addParent({ id: uuidv4(), userId: user.id, childStudentId: childId, email });
     } else if (role === "teacher") {
       addTeacher({ id: uuidv4(), userId: user.id, courses: extra.courses || [], email });
     }

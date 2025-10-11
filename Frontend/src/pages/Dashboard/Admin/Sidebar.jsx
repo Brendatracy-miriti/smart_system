@@ -31,6 +31,7 @@ export default function AdminSidebar() {
     { to: "/admin/transport", label: "Transport", icon: Truck },
     { to: "/admin/funds", label: "Funds", icon: DollarSign },
     { to: "/admin/notifications", label: "Notifications", icon: Bell },
+    { to: "/admin/seed-students", label: "Seed Students", icon: BookOpen },
     { to: "/admin/academic-insights", label: "Insights", icon: BookOpen },
     { to: "/admin/settings", label: "Settings", icon: Settings },
   ];

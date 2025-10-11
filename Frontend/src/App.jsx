@@ -21,6 +21,7 @@ import Notifications from "./pages/Dashboard/Admin/Notifications";
 import AcademicInsights from "./pages/Dashboard/Admin/AcademicInsights";
 import AdminSettings from "./pages/Dashboard/Admin/Settings";
 import AdminSidebar from "./pages/Dashboard/Admin/Sidebar";
+import SeedStudents from "./pages/Dashboard/Admin/SeedStudents";
 
 // Teacher
 import TeacherSidebar from "./pages/Dashboard/Teacher/Sidebar";
@@ -67,6 +68,7 @@ function AnimatedRoutes() {
           <Route path="users" element={<Users />} />
           <Route path="funds" element={<Funds />} />
           <Route path="notifications" element={<Notifications />} />
+          <Route path="seed-students" element={<SeedStudents />} />
           <Route path="academic-insights" element={<AcademicInsights />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
