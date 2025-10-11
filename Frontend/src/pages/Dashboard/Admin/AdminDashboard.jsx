@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import Papa from "papaparse";
 import { motion } from "framer-motion";
 import { Users, FileText, Truck, DollarSign } from "lucide-react";
 import StatCard from "../../../ui/StatCard";
 import FundChart from "../../../ui/FundChart";
+import FundTable from "../../../ui/FundTable";
 import { useMessage } from "../../../hooks/useMessage";
 import { useData } from "../../../context/DataContext";
 
@@ -13,6 +15,7 @@ import { useTheme } from "../../../context/ThemeContext";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function AdminDashboard() {
+  const [financeFunds, setFinanceFunds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({
     students: 0,
@@ -60,6 +63,25 @@ export default function AdminDashboard() {
       } else {
         setTrendData([]);
       }
+
+      // Load finance_data.csv and parse for FundTable
+      fetch("/Data/finance_data.csv")
+        .then(res => res.text())
+        .then(csv => {
+          Papa.parse(csv, {
+            header: true,
+            complete: (results) => {
+              const funds = results.data.map((row, idx) => ({
+                id: idx + 1,
+                title: row.month,
+                category: row.flag,
+                amount: row.actual_spent,
+                date: row.month,
+              }));
+              setFinanceFunds(funds);
+            }
+          });
+        });
 
       setLoading(false);
     } catch (err) {
@@ -206,6 +228,10 @@ export default function AdminDashboard() {
           {/* Funds Chart */}
           <div className="lg:col-span-2">
             <FundChart data={trendData} />
+            {/* Finance Data Table */}
+            <div className="mt-6">
+              <FundTable funds={financeFunds} loading={loading} />
+            </div>
           </div>
 
           {/* Quick Actions */}
