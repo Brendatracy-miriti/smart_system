@@ -55,6 +55,12 @@ export const DataProvider = ({ children }) => {
 
   const addFund = (f) => setData((p) => ({ ...p, funds: [...p.funds, f] }));
 
+  const updateFund = (id, patch) =>
+    setData((p) => ({ ...p, funds: p.funds.map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+
+  const deleteFund = (id) =>
+    setData((p) => ({ ...p, funds: p.funds.filter((x) => x.id !== id) }));
+
   const requestMentorship = (studentId, teacherId) =>
     setData((p) => ({ ...p, mentorships: [...p.mentorships, { id: Date.now(), studentId, teacherId, status: "pending", createdAt: new Date().toISOString() }] }));
 
@@ -102,6 +108,8 @@ export const DataProvider = ({ children }) => {
         addBus,
         upsertBus,
         addFund,
+  updateFund,
+  deleteFund,
         requestMentorship,
         updateMentorshipStatus,
         refresh,

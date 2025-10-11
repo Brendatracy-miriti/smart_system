@@ -38,6 +38,8 @@ export default function AdminDashboard() {
   const { setMessage } = useMessage();
   const { data } = useData();
   const { theme } = useTheme();
+  const [editingFund, setEditingFund] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const handleCreateFund = () => setShowCreateFund(true);
 
@@ -235,6 +237,57 @@ export default function AdminDashboard() {
           <p className="text-gray-500 mt-2">No at-risk students detected.</p>
         )}
       </div>
+      {/* Edit Fund Modal */}
+      {editingFund && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-11/12 max-w-md shadow-lg">
+            <h4 className="text-lg font-semibold mb-3">Edit Fund</h4>
+            <div className="space-y-3">
+              <input value={editingFund.title} onChange={(e) => setEditingFund({ ...editingFund, title: e.target.value })} placeholder="Title" className="w-full px-3 py-2 rounded border" />
+              <input value={editingFund.amount} onChange={(e) => setEditingFund({ ...editingFund, amount: e.target.value })} placeholder="Amount" type="number" className="w-full px-3 py-2 rounded border" />
+              <input value={editingFund.category} onChange={(e) => setEditingFund({ ...editingFund, category: e.target.value })} placeholder="Category" className="w-full px-3 py-2 rounded border" />
+              <input value={editingFund.date ? editingFund.date.split("T")[0] : ""} onChange={(e) => setEditingFund({ ...editingFund, date: e.target.value })} placeholder="Date" type="date" className="w-full px-3 py-2 rounded border" />
+            </div>
+            <div className="mt-4 flex gap-3 justify-end">
+              <button onClick={() => setEditingFund(null)} className="px-4 py-2 rounded-lg border">Cancel</button>
+              <button
+                onClick={() => {
+                  // commit edit
+                  if (typeof dataCtx?.updateFund === "function") dataCtx.updateFund(editingFund.id, { ...editingFund });
+                  setMessage({ type: "success", text: "Fund updated" });
+                  setEditingFund(null);
+                }}
+                className="px-4 py-2 rounded-lg bg-primary text-white"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-11/12 max-w-md shadow-lg">
+            <h4 className="text-lg font-semibold mb-3 text-red-600">Confirm Delete</h4>
+            <p>Are you sure you want to delete the fund <strong>{confirmDelete.title}</strong>?</p>
+            <div className="mt-4 flex gap-3 justify-end">
+              <button onClick={() => setConfirmDelete(null)} className="px-4 py-2 rounded-lg border">Cancel</button>
+              <button
+                onClick={() => {
+                  if (typeof dataCtx?.deleteFund === "function") dataCtx.deleteFund(confirmDelete.id);
+                  setMessage({ type: "success", text: "Fund deleted" });
+                  setConfirmDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
   <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow mt-6">
       <h3 className="text-lg font-semibold flex items-center gap-2 mb-4 text-primary">
@@ -270,7 +323,7 @@ export default function AdminDashboard() {
             <FundChart data={trendData} />
             {/* Finance Data Table */}
             <div className="mt-6">
-              <FundTable funds={financeFunds} loading={loading} />
+              <FundTable funds={Array.isArray(data?.funds) && data.funds.length ? data.funds : financeFunds} loading={loading} onEdit={(f) => setEditingFund(f)} onDelete={(f) => setConfirmDelete(f)} />
             </div>
           </div>
 
