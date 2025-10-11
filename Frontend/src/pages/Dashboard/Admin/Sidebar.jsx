@@ -12,17 +12,14 @@ import {
   BookOpen,
   Settings,
   LogOut,
-  ChevronRight,
-  ChevronLeft,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
-export default function Sidebar() {
+export default function AdminSidebar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-
   const { logout } = useAuth();
+
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -39,134 +36,66 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      {/* Mobile topbar */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-[#111827] shadow-md">
-        <h1 className="text-lg font-bold text-primary">Edu-Guardian</h1>
-        <button
-          onClick={() => setOpen(true)}
-          className="text-gray-700 dark:text-gray-200"
-        >
-          <Menu size={26} />
-        </button>
-      </div>
-
-      <div className="flex">
-        {/* Sidebar (Desktop) */}
-        <aside
-          className={`hidden lg:flex flex-col bg-white dark:bg-[#111827] text-gray-800 dark:text-gray-200 min-h-screen shadow-lg transition-all duration-200 ${
-            collapsed ? "w-20" : "w-64"
-          }`}
-        >
-          <div className="p-4 flex items-center gap-2">
-            <button
-              onClick={() => setCollapsed((s) => !s)}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="text-gray-600 dark:text-gray-200 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 z-50"
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              <Menu size={22} />
-            </button>
-            {!collapsed && (
-              <h1 className="text-xl font-bold text-primary ml-2">Edu-Guardian</h1>
-            )}
-          </div>
-
-          <nav className="flex-1 px-3 space-y-1">
-            {links.map(({ to, label, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${
-                    isActive
-                      ? "bg-primary text-white"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`
-                }
-              >
-                <Icon size={18} />
-                <span className={`${collapsed ? "hidden" : "block"}`}>{label}</span>
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 transition"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
-        </aside>
-
-        {/* Main content area where child routes render */}
-        <main className="flex-1 p-6">
-          <Outlet />
-        </main>
-      </div>
-
-      {/* Sidebar (Mobile Drawer) */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden"
+    <div className="flex min-h-screen bg-gray-50 dark:bg-[#F3F4F6]">
+      {/* Sidebar */}
+      <motion.aside
+        animate={{ width: open ? 230 : 70 }}
+        transition={{ duration: 0.3 }}
+        className="bg-[#0f172a] text-white flex flex-col shadow-lg z-50 min-h-screen"
+      >
+        {/* Top Section */}
+        <div className="flex items-center justify-between p-4 border-b border-blue-600">
+          <h2
+            className={`text-white font-bold text-lg transition-all duration-300 ${
+              !open && "opacity-0 hidden"
+            }`}
           >
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              className="w-64 h-full bg-white dark:bg-[#111827] shadow-xl p-5 flex flex-col justify-between"
+            Edu-Guardian
+          </h2>
+          <button
+            onClick={() => setOpen(!open)}
+            className="text-white focus:outline-none"
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="mt-6 flex-1 flex flex-col px-2 space-y-2">
+          {links.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
+                  isActive
+                    ? "bg-[#226eeb] text-white"
+                    : "text-gray-200 hover:bg-[#38BDF8]/20"
+                }`
+              }
             >
-              <div>
-                <div className="flex items-center justify-between mb-5">
-                  <h1 className="text-xl font-bold text-primary">Edu-Guardian</h1>
-                  <button
-                    onClick={() => setOpen(false)}
-                    className="text-gray-700 dark:text-gray-200"
-                  >
-                    <X size={22} />
-                  </button>
-                </div>
+              <Icon size={20} />
+              {open && <span>{label}</span>}
+            </NavLink>
+          ))}
+        </nav>
 
-                <nav className="space-y-1">
-                  {links.map(({ to, label, icon: Icon }) => (
-                    <NavLink
-                      key={to}
-                      to={to}
-                      onClick={() => setOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${
-                          isActive
-                            ? "bg-primary text-white"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                        }`
-                      }
-                    >
-                      <Icon size={18} />
-                      <span>{label}</span>
-                    </NavLink>
-                  ))}
-                </nav>
-              </div>
+        {/* Logout Section at Bottom */}
+        <div className="px-4 border-t border-blue-600 mt-auto">
+          <button
+            onClick={handleLogout}
+            className="items-center gap-3 px-4 py-2 mb-24 text-sm text-gray-200 rounded-lg hover:bg-red-600/80 transition-all w-full"
+          >
+            <LogOut size={20} />
+            {open && <span>Logout</span>}
+          </button>
+        </div>
+      </motion.aside>
 
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 transition"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Main Content */}
+      <main className="flex-1 p-6 overflow-y-auto">
+        <Outlet />
+      </main>
     </div>
   );
 }

@@ -1,12 +1,30 @@
 import React, { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Sun, Moon, LogOut, Home, BookOpen, Award, Calendar, Settings, Menu } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Sun,
+  Moon,
+  LogOut,
+  Home,
+  BookOpen,
+  Award,
+  Calendar,
+  Settings,
+  Menu,
+  X,
+} from "lucide-react";
 import { useTheme } from "../../../context/ThemeContext";
 
 export default function StudentSidebar() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    navigate("/login");
+  };
 
   const links = [
     { to: "/student", label: "Dashboard", icon: Home },
@@ -17,72 +35,127 @@ export default function StudentSidebar() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-[#0D1117]">
-      {/* Sidebar */}
+    <div className="flex min-h-screen bg-[#F3F4F6] dark:bg-[#0F172A] text-gray-900 dark:text-gray-100">
+      {/* Desktop Sidebar */}
       <motion.aside
-        initial={{ x: -50, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
+        animate={{ width: open ? 230 : 70 }}
         transition={{ duration: 0.3 }}
-        className={`${
-          open ? "w-64" : "w-20"
-        } bg-white dark:bg-[#1F2937] p-4 shadow-lg flex flex-col justify-between transition-all`}
+        className="hidden md:flex bg-[#0f172a] flex-col justify-between shadow-lg z-50 min-h-screen"
       >
         <div>
-          <div className="flex items-center gap-2 mb-6">
-            <button
-              onClick={() => setOpen((s) => !s)}
-              aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
-              className="text-gray-500 dark:text-gray-300 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-              title={open ? "Collapse sidebar" : "Expand sidebar"}
-            >
-              <Menu size={22} />
+          {/* Top Section */}
+          <div className="flex items-center justify-between p-4 border-b border-blue-600">
+            <h2 className={`text-white font-bold text-lg transition-all duration-300 ${!open && "opacity-0 hidden"}`}>
+              Edu-Guardian
+            </h2>
+            <button onClick={() => setOpen(!open)} className="text-white focus:outline-none">
+              {open ? <X size={22} /> : <Menu size={22} />}
             </button>
-            {open && <span className="text-lg font-bold text-primary ml-2">Edu-Guardian</span>}
           </div>
-          <nav className="space-y-2">
-            {links.map((link) => (
+
+          {/* Navigation Links */}
+          <nav className="mt-6 flex-1 flex flex-col space-y-2 px-2 overflow-y-auto">
+            {links.map(({ to, label, icon: Icon }) => (
               <NavLink
-                key={link.to}
-                to={link.to}
+                key={to}
+                to={to}
                 end
                 className={({ isActive }) =>
-                  `block px-3 py-2 rounded-md text-sm font-medium ${
-                    isActive
-                      ? "bg-primary text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  `flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
+                    isActive ? "bg-[#226eeb] text-white" : "text-gray-200 hover:bg-[#38BDF8]/20"
                   }`
                 }
               >
-                {open ? link.label : <link.icon size={18} />}
+                <Icon size={20} />
+                {open && <span>{label}</span>}
               </NavLink>
             ))}
           </nav>
         </div>
 
-        <div className="space-y-3">
-          <button
-            onClick={toggleTheme}
-            className="w-full flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300"
-          >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-            {open && (theme === "dark" ? "Light Mode" : "Dark Mode")}
-          </button>
+        {/* Bottom Section */}
+        {/* Bottom Section */}
+<div className="px-4 border-t border-blue-600 mt-auto mb-4 flex flex-col gap-2">
+  <button
+    onClick={handleLogout}
+    className=" items-center gap-3 px-4 py-2 w-full text-sm text-gray-200 rounded-lg hover:bg-red-600/80 transition-all"
+  >
+    <LogOut size={20} />
+    {open && <span>Logout</span>}
+  </button>
+</div>
 
-          <button
-            onClick={() => {
-              localStorage.removeItem("currentUser");
-              window.location.href = "/login";
-            }}
-            className="w-full flex items-center justify-center gap-2 text-red-500 hover:text-red-600"
-          >
-            <LogOut size={18} />
-            {open && "Logout"}
-          </button>
-        </div>
       </motion.aside>
 
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 bg-black/50 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.aside
+              className="fixed top-0 left-0 h-full bg-[#0f172a] z-50 flex flex-col justify-between w-64 shadow-lg"
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div>
+                <div className="flex items-center justify-between p-4 border-b border-blue-600">
+                  <h2 className="text-white font-bold text-lg">Edu-Guardian</h2>
+                  <button onClick={() => setMobileOpen(false)} className="text-white focus:outline-none">
+                    <X size={22} />
+                  </button>
+                </div>
+                <nav className="mt-6 flex flex-col space-y-2 px-2">
+                  {links.map(({ to, label, icon: Icon }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      end
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
+                          isActive ? "bg-[#226eeb] text-white" : "text-gray-200 hover:bg-[#38BDF8]/20"
+                        }`
+                      }
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Icon size={20} />
+                      <span>{label}</span>
+                    </NavLink>
+                  ))}
+                </nav>
+              </div>
+
+              <div className="px-4 border-t border-blue-600 mt-auto mb-4 flex flex-col gap-2">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-gray-200 rounded-lg hover:bg-red-600/80 transition-all"
+                >
+                  <LogOut size={20} />
+                  Logout
+                </button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className={`flex-1 p-6 overflow-y-auto transition-all duration-300 relative`}>
+        {/* Mobile menu toggle button */}
+        <button
+          className="md:hidden mb-4 text-gray-900 dark:text-gray-100"
+          onClick={() => setMobileOpen(true)}
+        >
+          <Menu size={24} />
+        </button>
         <Outlet />
       </main>
     </div>

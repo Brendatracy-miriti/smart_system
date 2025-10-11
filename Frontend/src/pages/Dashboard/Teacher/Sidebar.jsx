@@ -46,11 +46,11 @@ export default function TeacherSidebar() {
       <motion.aside
         animate={{ width: open ? 230 : 70 }}
         transition={{ duration: 0.3 }}
-        className="bg-[#1E3A8A] dark:bg-[#1E293B] flex flex-col justify-between shadow-lg z-50"
+        className="bg-[#0f172a] dark:bg-[#1E293B] flex flex-col justify-between shadow-lg z-50"
       >
         <div>
           {/* Top section */}
-          <div className="flex items-center justify-between p-4 border-b border-blue-800">
+          <div className="flex items-center justify-between p-4 border-b border-blue-600">
             <h2
               className={`text-white font-bold text-lg transition-all duration-300 ${
                 !open && "opacity-0 hidden"
@@ -76,7 +76,7 @@ export default function TeacherSidebar() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                     isActive
-                      ? "bg-[#10B981] text-white"
+                      ? "bg-[#226eeb] text-white"
                       : "text-gray-200 hover:bg-[#38BDF8]/20"
                   }`
                 }
@@ -89,16 +89,7 @@ export default function TeacherSidebar() {
         </div>
 
         {/* Bottom section */}
-        <div className="flex flex-col gap-2 p-4 border-t border-blue-800">
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2 text-sm text-gray-200 rounded-lg hover:bg-[#38BDF8]/20"
-          >
-            {theme === "dark" ? " Light Mode" : " Dark Mode"}
-          </button>
-
-          {/* Logout */}
+        <div className="flex flex-col gap-2 p-4 border-t border-blue-600">
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2 text-sm text-gray-200 rounded-lg hover:bg-red-600/80 transition-all"
