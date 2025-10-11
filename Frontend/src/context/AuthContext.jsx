@@ -19,6 +19,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signup = async ({ name, email, password, role, extra = {} }) => {
+    // disallow creating admin accounts via signup form
+    if ((role || "").toLowerCase() === "admin") {
+      throw new Error("Admin accounts cannot be created via signup. Please use the login page with the admin credentials.");
+    }
     if (findUserByEmail(email)) throw new Error("Email already taken");
     const user = { id: uuidv4(), name, email, password, role, avatarBase64: extra.avatar || null };
     addUser(user);

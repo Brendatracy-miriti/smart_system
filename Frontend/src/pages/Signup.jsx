@@ -32,6 +32,13 @@ export default function Signup() {
       return;
     }
 
+    // Prevent admin signups — admins must login with provided admin credentials
+    if (role === "admin" || username.trim().toLowerCase() === "admin") {
+      setMessage({ type: "info", text: "Admin accounts cannot be created here. Please login using the admin credentials." });
+      navigate("/login");
+      return;
+    }
+
     try {
       setLoading(true);
       const extra = {};
@@ -209,7 +216,7 @@ export default function Signup() {
                 <option value="student">Student</option>
                 <option value="parent">Parent</option>
                 <option value="teacher">Teacher</option>
-                <option value="admin">Admin</option>
+                {/* Admin signup is intentionally disabled. Admins must login using provided credentials. */}
               </select>
             </div>
 
