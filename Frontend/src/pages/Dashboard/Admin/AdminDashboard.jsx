@@ -9,6 +9,7 @@ import { useData } from "../../../context/DataContext";
 import { AlertTriangle, PieChart as PieChartIcon } from "lucide-react";
 import { useContext, useMemo } from "react";
 import { DataContext } from "../../../context/DataContext";
+import { useTheme } from "../../../context/ThemeContext";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function AdminDashboard() {
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
   const [trendData, setTrendData] = useState([]); // [{month:'Jan', income:100, expense:50}]
   const { setMessage } = useMessage();
   const { data } = useData();
+  const { theme } = useTheme();
 
   useEffect(() => {
     // compute counts and trend locally from DataContext/localStorage
@@ -142,7 +144,7 @@ export default function AdminDashboard() {
         </div>
 
 
-        <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow">
+  <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow">
         <h3 className="text-lg font-semibold flex items-center gap-2 text-red-600">
           <AlertTriangle size={20} /> At-Risk Students
         </h3>
@@ -172,21 +174,21 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow mt-6">
+  <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow mt-6">
       <h3 className="text-lg font-semibold flex items-center gap-2 mb-4 text-primary">
         <PieChartIcon size={20} /> Student Risk Analytics
       </h3>
       {riskByCourse.length ? (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={riskByCourse}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="course" stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
+            <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#111827" : "#e5e7eb"} />
+            <XAxis dataKey="course" stroke={theme === "dark" ? "#9ca3af" : "#9ca3af"} />
+            <YAxis stroke={theme === "dark" ? "#9ca3af" : "#9ca3af"} />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1F2937",
+                backgroundColor: theme === "dark" ? "#1F2937" : "#ffffff",
                 borderRadius: "0.5rem",
-                color: "#f3f4f6",
+                color: theme === "dark" ? "#f3f4f6" : "#111827",
               }}
             />
             <Bar dataKey="safe" stackId="a" fill="#10B981" name="Safe Students" />
@@ -207,7 +209,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white dark:bg-[#1F2937] p-5 rounded-2xl shadow space-y-4">
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow space-y-4">
             <h3 className="text-lg font-semibold text-[#111827] dark:text-gray-100">
               Quick Actions
             </h3>

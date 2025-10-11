@@ -31,7 +31,7 @@ export default function AcademicInsights() {
       <h2 className="text-2xl font-bold text-primary">Academic Insights</h2>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow">
           <h3 className="font-semibold mb-3">Average grades by course</h3>
           <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -45,7 +45,7 @@ export default function AcademicInsights() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#071027] p-4 rounded-2xl shadow">
+  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow">
           <h3 className="font-semibold mb-3">At-risk students</h3>
           {atRisk.length ? (
             <ul className="space-y-2">

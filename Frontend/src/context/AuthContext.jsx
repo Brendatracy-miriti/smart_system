@@ -58,6 +58,8 @@ export function AuthProvider({ children }) {
     }
     localStorage.setItem("eg_current_user", JSON.stringify(user));
     setCurrent(user);
+    // notify other contexts that data changed
+    try { window.dispatchEvent(new Event('storage')); } catch (e) {}
     return user;
   };
 

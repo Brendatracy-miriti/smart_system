@@ -35,7 +35,7 @@ export default function StudentSidebar() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#F3F4F6] dark:bg-[#0F172A] text-gray-900 dark:text-gray-100">
+  <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Desktop Sidebar */}
       <motion.aside
         animate={{ width: open ? 230 : 70 }}
