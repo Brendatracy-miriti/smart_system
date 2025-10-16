@@ -8,7 +8,18 @@ const read = (k) => {
     return [];
   }
 };
-const write = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const write = (k, v) => {
+  try {
+    localStorage.setItem(k, JSON.stringify(v));
+    // Also write a plain key without the eg_ prefix for compatibility
+    if (typeof k === 'string' && k.startsWith('eg_')) {
+      const plain = k.replace(/^eg_/, '');
+      localStorage.setItem(plain, JSON.stringify(v));
+    }
+  } catch (e) {
+    // ignore storage errors
+  }
+};
 
 export const keys = {
   USERS: "eg_users",
@@ -28,6 +39,7 @@ export const keys = {
 export const getUsers = () => read(keys.USERS);
 export const addUser = (u) => {
   const user = { is_active: true, ...u };
+  if (!user.id) user.id = Date.now();
   const all = getUsers();
   all.unshift(user);
   write(keys.USERS, all);

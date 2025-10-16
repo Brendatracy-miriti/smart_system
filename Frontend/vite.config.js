@@ -7,6 +7,10 @@ export default defineConfig({
   plugins: [react(), VitePWA({
     registerType: 'autoUpdate',
     devOptions: { enabled: true },
+    // Single-page app fallback for client-side routes
+    navigateFallback: '/index.html',
+    // Denylist API and asset requests from being redirected
+    navigateFallbackDenylist: [/^\/api\//, /^\/_/, /\.[a-zA-Z0-9]{2,4}$/],
     workbox: {
       globPatterns: ['**/*.{js,css,html,png,svg,ico,json}']
     },
