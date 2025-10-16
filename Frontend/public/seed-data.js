@@ -66,18 +66,18 @@
   // current user — set to Alice for testing student dashboard
   const eg_current_user = users.find(u => u.email === 'alice@example.com');
 
-  localStorage.setItem('users', JSON.stringify(users));
-  localStorage.setItem('students', JSON.stringify(students));
-  localStorage.setItem('parents', JSON.stringify(parents));
-  localStorage.setItem('buses', JSON.stringify(buses));
+  localStorage.setItem('eg_users', JSON.stringify(users));
+  localStorage.setItem('eg_students', JSON.stringify(students));
+  localStorage.setItem('eg_parents', JSON.stringify(parents));
+  localStorage.setItem('eg_transport', JSON.stringify(buses));
   localStorage.setItem('funds', JSON.stringify(funds));
-  localStorage.setItem('assignments', JSON.stringify(assignments));
-  localStorage.setItem('grades', JSON.stringify(grades));
-  localStorage.setItem('timetable', JSON.stringify(timetable));
-  localStorage.setItem('submissions', JSON.stringify(submissions));
-  localStorage.setItem('attendance', JSON.stringify(attendance));
+  localStorage.setItem('eg_assignments', JSON.stringify(assignments));
+  localStorage.setItem('eg_grades', JSON.stringify(grades));
+  localStorage.setItem('eg_timetables', JSON.stringify(timetable));
+  localStorage.setItem('eg_submissions', JSON.stringify(submissions));
+  localStorage.setItem('eg_attendance', JSON.stringify(attendance));
   localStorage.setItem('mentorships', JSON.stringify(mentorships));
-  localStorage.setItem('messages', JSON.stringify(messages));
+  localStorage.setItem('eg_notifications', JSON.stringify(messages));
   localStorage.setItem('eg_current_user', JSON.stringify(eg_current_user));
 
   console.info('Seeded localStorage with dummy data for dev.');

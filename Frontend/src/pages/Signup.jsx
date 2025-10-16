@@ -35,8 +35,14 @@ export default function Signup() {
       return;
     }
 
+    // Trim inputs
+    const trimmedName = name.trim();
+    const trimmedUsername = username.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
     // Prevent admin signups — admins must login with provided admin credentials
-    if (role === "admin" || username.trim().toLowerCase() === "admin") {
+    if (role === "admin" || trimmedUsername.toLowerCase() === "admin") {
       setMessage({ type: "info", text: "Admin accounts cannot be created here. Please login using the admin credentials." });
       navigate("/login");
       return;
@@ -73,12 +79,12 @@ export default function Signup() {
       const extra = {};
 
       if (role === "student") {
-        extra.admission_number = admission;
-        extra.course = course;
+        extra.admission_number = admission.trim();
+        extra.course = course.trim();
       }
 
       if (role === "parent") {
-        extra.childStudentId = childStudentId || null;
+        extra.childStudentId = childStudentId.trim() || null;
       }
 
       if (role === "teacher") {
@@ -88,7 +94,7 @@ export default function Signup() {
           .filter(Boolean);
       }
 
-      await signup({ name, username, email, password, role, extra });
+      await signup({ name: trimmedName, username: trimmedUsername, email: trimmedEmail, password: trimmedPassword, role, extra });
       setMessage({ type: "success", text: "Signup success!" });
       navigate(`/${role}`);
     } catch (err) {

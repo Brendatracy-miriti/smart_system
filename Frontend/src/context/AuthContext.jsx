@@ -27,17 +27,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async ({ identifier, password }) => {
-    // Find user by email or name (case-insensitive)
+    // Find user by email, name, or username (case-insensitive)
     if (!identifier) throw new Error("Invalid credentials");
-    const id = String(identifier).trim();
-    let user = findUserByEmail(id);
-    if (!user) {
-      const lower = id.toLowerCase();
-      const all = getUsers();
-      user = all.find((u) => (u.email && u.email.toLowerCase() === lower) || (u.name && u.name.toLowerCase() === lower));
-    }
+    const id = String(identifier).trim().toLowerCase();
+    const all = getUsers();
+    let user = all.find((u) => (u.email && u.email.toLowerCase() === id) || (u.name && u.name.toLowerCase() === id) || (u.username && u.username.toLowerCase() === id));
 
-    if (user && user.password === password) {
+    if (user && user.password === password.trim()) {
       setCurrent(user);
       localStorage.setItem("eg_current_user", JSON.stringify(user));
       return user;

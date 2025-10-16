@@ -8,18 +8,7 @@ const read = (k) => {
     return [];
   }
 };
-const write = (k, v) => {
-  try {
-    localStorage.setItem(k, JSON.stringify(v));
-    // Also write a plain key without the eg_ prefix for compatibility
-    if (typeof k === 'string' && k.startsWith('eg_')) {
-      const plain = k.replace(/^eg_/, '');
-      localStorage.setItem(plain, JSON.stringify(v));
-    }
-  } catch (e) {
-    // ignore storage errors
-  }
-};
+const write = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
 export const keys = {
   USERS: "eg_users",
@@ -38,8 +27,7 @@ export const keys = {
 // users
 export const getUsers = () => read(keys.USERS);
 export const addUser = (u) => {
-  const user = { is_active: true, ...u };
-  if (!user.id) user.id = Date.now();
+  const user = { id: Date.now(), is_active: true, ...u };
   const all = getUsers();
   all.unshift(user);
   write(keys.USERS, all);
@@ -50,7 +38,7 @@ export const updateUser = (id, patch) => {
   write(keys.USERS, all);
   return all.find((x) => x.id === id);
 };
-export const findUserByEmail = (email) => getUsers().find((u) => u.email === email);
+export const findUserByEmail = (email) => getUsers().find((u) => u.email && u.email.toLowerCase() === email.toLowerCase());
 
 // students
 export const getStudents = () => read(keys.STUDENTS);
