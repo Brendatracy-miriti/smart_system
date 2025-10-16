@@ -3,18 +3,22 @@ import { motion } from "framer-motion";
 import Papa from "papaparse";
 import ProgressRing from "../../../ui/ProgressRing";
 import MiniCard from "../../../ui/MiniCard";
-import { BookOpen, Clock, ClipboardList, BarChart2 } from "lucide-react";
+import MessageCard from "../../../ui/MessageCard";
+import { BookOpen, Clock, ClipboardList, BarChart2, MessageSquare } from "lucide-react";
 import { useLive } from "../../../context/LiveContext";
+import { useData } from "../../../context/DataContext";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function StudentDashboard() {
   const { current: user } = useAuth();
   const liveData = useLive();
+  const { data } = useData();
   // Defensive: fallback to empty arrays if context is not ready
   const timetables = liveData?.timetable || [];
   const assignments = liveData?.assignments || [];
   const submissions = liveData?.submissions || [];
   const grades = liveData?.grades || [];
+  const messages = data?.messages || [];
   const [profile, setProfile] = useState(null);
   const [upcoming, setUpcoming] = useState([]);
   const [dropoutRisk, setDropoutRisk] = useState(null);
@@ -137,6 +141,17 @@ export default function StudentDashboard() {
             ))}
           </ul>
         ) : (<p className="text-gray-500">No upcoming lessons for today.</p>)}
+      </div>
+
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md">
+        <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100 mb-4">Recent Messages</h3>
+        {messages.length ? (
+          <div className="space-y-3">
+            {messages.slice(0, 3).map((m) => (
+              <MessageCard key={m.id} sender={m.sender} message={m.message} date={m.date} />
+            ))}
+          </div>
+        ) : (<p className="text-gray-500">No messages yet.</p>)}
       </div>
 
       {/* QUICK ACCESS */}

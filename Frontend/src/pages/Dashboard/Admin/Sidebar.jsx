@@ -12,6 +12,7 @@ import {
   BookOpen,
   Settings,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -31,6 +32,7 @@ export default function AdminSidebar() {
     { to: "/admin/transport", label: "Transport", icon: Truck },
     { to: "/admin/funds", label: "Funds", icon: DollarSign },
     { to: "/admin/notifications", label: "Notifications", icon: Bell },
+    { to: "/admin/messages", label: "Messages", icon: MessageSquare },
     { to: "/admin/seed-students", label: "Seed Students", icon: BookOpen },
     { to: "/admin/academic-insights", label: "Insights", icon: BookOpen },
     { to: "/admin/settings", label: "Settings", icon: Settings },

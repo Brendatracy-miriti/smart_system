@@ -130,6 +130,7 @@ export const DataProvider = ({ children }) => {
         updateUser,
         addAssignment,
         addSubmission,
+        addMessage,
         addBus,
         upsertBus,
         addFund,

@@ -14,7 +14,7 @@ export const LiveProvider = ({ children }) => {
     grades: JSON.parse(localStorage.getItem("grades")) || [],
     attendance: JSON.parse(localStorage.getItem("attendance")) || [],
     timetable: JSON.parse(localStorage.getItem("timetable")) || [],
-    messages: JSON.parse(localStorage.getItem("messages")) || [],
+    messages: JSON.parse(localStorage.getItem("messages") || localStorage.getItem("eg_notifications") || "[]"),
   });
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export const LiveProvider = ({ children }) => {
           grades: JSON.parse(localStorage.getItem("grades")) || [],
           attendance: JSON.parse(localStorage.getItem("attendance")) || [],
           timetable: JSON.parse(localStorage.getItem("timetable")) || [],
-          messages: JSON.parse(localStorage.getItem("messages")) || [],
+          messages: JSON.parse(localStorage.getItem("messages") || localStorage.getItem("eg_notifications") || "[]"),
         });
       } catch (e) {}
     };
@@ -71,7 +71,7 @@ export const LiveProvider = ({ children }) => {
       grades: JSON.parse(localStorage.getItem("grades")) || [],
       attendance: JSON.parse(localStorage.getItem("attendance")) || [],
       timetable: JSON.parse(localStorage.getItem("timetable")) || [],
-      messages: JSON.parse(localStorage.getItem("messages")) || [],
+      messages: JSON.parse(localStorage.getItem("messages") || localStorage.getItem("eg_notifications") || "[]"),
     });
   };
 

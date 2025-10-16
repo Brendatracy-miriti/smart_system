@@ -12,6 +12,7 @@ import {
   Settings,
   Menu,
   X,
+  MessageSquare,
 } from "lucide-react";
 import { useTheme } from "../../../context/ThemeContext";
 import { useAuth } from "../../../context/AuthContext";
@@ -28,6 +29,7 @@ export default function StudentSidebar() {
 
   const links = [
     { to: "/student", label: "Dashboard", icon: Home },
+    { to: "/student/messages", label: "Messages", icon: MessageSquare },
     { to: "/student/assignments", label: "Assignments", icon: BookOpen },
     { to: "/student/grades", label: "Grades", icon: Award },
     { to: "/student/courses", label: "Courses", icon: Calendar },

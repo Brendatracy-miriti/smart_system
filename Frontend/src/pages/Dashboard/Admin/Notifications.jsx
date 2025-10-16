@@ -4,12 +4,14 @@ import { Bell, Trash2, CheckCircle2, AlertTriangle, Bus, DollarSign, Send } from
 import api from "../../../utils/api";
 import { useMessage } from "../../../hooks/useMessage";
 import { pushNotification, getNotifications } from "../../../utils/localData";
+import { useData } from "../../../context/DataContext";
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const { setMessage } = useMessage();
+  const { data, addMessage } = useData();
 
   const fetchNotifications = async () => {
     try {
@@ -72,22 +74,33 @@ export default function Notifications() {
       return;
     }
 
-    const payload = {
-      title: compose.title,
-      message: compose.message,
+    const currentUser = JSON.parse(localStorage.getItem("eg_current_user") || "null");
+    const sender = currentUser?.name || "Admin";
+
+    const newMessage = {
+      id: Date.now(),
+      sender,
+      message: `${compose.title}: ${compose.message}`,
+      date: new Date().toLocaleString(),
       type: compose.type,
     };
 
     try {
-      const res = await api.post("notifications/", payload);
+      const res = await api.post("notifications/", {
+        title: compose.title,
+        message: compose.message,
+        type: compose.type,
+      });
       // assume API returns created object
       setNotifications((prev) => [res.data, ...prev]);
+      addMessage(newMessage); // Add to global messages
       setMessage({ type: "success", text: "Notification posted." });
       setCompose({ title: "", message: "", type: "system" });
     } catch {
       // fallback to local storage
-      const saved = pushNotification({ title: payload.title, message: payload.message, type: payload.type, createdAt: new Date().toISOString() });
+      const saved = pushNotification({ title: compose.title, message: compose.message, type: compose.type, createdAt: new Date().toISOString() });
       setNotifications((prev) => [saved, ...prev]);
+      addMessage(newMessage); // Add to global messages
       setMessage({ type: "success", text: "Notification saved locally (offline mode)." });
       setCompose({ title: "", message: "", type: "system" });
     }
