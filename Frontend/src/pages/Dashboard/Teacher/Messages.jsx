@@ -9,7 +9,10 @@ export default function Messages() {
   const [to, setTo] = useState("");
   const [message, setMessage] = useState("");
 
-  const messages = data.messages || [];
+  const userRole = JSON.parse(localStorage.getItem("eg_current_user") || "null")?.role || "teacher";
+  const messages = (data.messages || []).filter((m) =>
+    Array.isArray(m.to) ? m.to.includes(userRole) || m.to.includes("All") : m.to === userRole || m.to === "All"
+  );
 
   const send = () => {
     if (!message) return alert("Enter message");

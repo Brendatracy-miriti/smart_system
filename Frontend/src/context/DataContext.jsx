@@ -62,7 +62,11 @@ export const DataProvider = ({ children }) => {
 
   const addSubmission = (s) => setData((p) => ({ ...p, submissions: [...p.submissions, s] }));
 
-  const addMessage = (m) => setData((p) => ({ ...p, messages: [...p.messages, m] }));
+  const addMessage = (m) => {
+    // Ensure 'to' is an array for new messages
+    const message = { ...m, to: Array.isArray(m.to) ? m.to : [m.to || "All"] };
+    setData((p) => ({ ...p, messages: [...p.messages, message] }));
+  };
 
   const addBus = (b) => setData((p) => ({ ...p, buses: [...p.buses, b] }));
 

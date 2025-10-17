@@ -6,23 +6,39 @@ import { useData } from "../../../context/DataContext";
 export default function Messages() {
   const { data, addMessage } = useData();
   const [showCompose, setShowCompose] = useState(false);
-  const [to, setTo] = useState("");
+  const [selectedRoles, setSelectedRoles] = useState([]);
   const [message, setMessage] = useState("");
+
+  const roles = ["Teacher", "Student", "Parent", "All"];
+
+  const handleRoleChange = (role) => {
+    if (role === "All") {
+      setSelectedRoles(["All"]);
+    } else {
+      setSelectedRoles((prev) => {
+        const newRoles = prev.includes(role)
+          ? prev.filter((r) => r !== role)
+          : [...prev.filter((r) => r !== "All"), role];
+        return newRoles.length === 0 ? ["All"] : newRoles;
+      });
+    }
+  };
 
   const messages = data.messages || [];
 
   const send = () => {
     if (!message) return alert("Enter message");
+    if (selectedRoles.length === 0) return alert("Select at least one recipient role");
     const m = {
       id: Date.now(),
       sender: JSON.parse(localStorage.getItem("eg_current_user") || "null")?.name || "Admin",
-      to,
+      to: selectedRoles,
       message,
       date: new Date().toLocaleString(),
     };
     addMessage(m);
     setMessage("");
-    setTo("");
+    setSelectedRoles([]);
     setShowCompose(false);
     window.dispatchEvent(new Event("storage"));
   };
@@ -43,7 +59,22 @@ export default function Messages() {
 
       {showCompose && (
         <div className="bg-white dark:bg-[#1F2937] p-4 rounded-2xl shadow mb-4">
-          <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="To (optional)" className="w-full p-2 border rounded mb-2" />
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Recipients:</label>
+            <div className="flex flex-wrap gap-2">
+              {roles.map((role) => (
+                <label key={role} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedRoles.includes(role)}
+                    onChange={() => handleRoleChange(role)}
+                    className="mr-2"
+                  />
+                  {role}
+                </label>
+              ))}
+            </div>
+          </div>
           <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Write message..." className="w-full p-2 border rounded mb-2" />
           <div className="flex justify-end">
             <button onClick={send} className="px-4 py-2 bg-green-600 text-white rounded">Send</button>
