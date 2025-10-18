@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useData } from "../../../context/DataContext";
-import { useMessage } from "../../../context/MessageContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function TeacherAssignments() {
   const { data, addAssignment, refresh } = useData();
-  const { setMessage } = useMessage();
-  const teacher = JSON.parse(localStorage.getItem("eg_current_user") || "null");
+  const { current: teacher } = useAuth();
+  const [message, setMessage] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState("");

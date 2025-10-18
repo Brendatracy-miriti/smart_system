@@ -2,12 +2,14 @@ import React from "react";
 import { motion } from "framer-motion";
 import MessageCard from "../../../ui/MessageCard";
 import { useData } from "../../../context/DataContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Messages() {
   const { data } = useData();
-  const userRole = JSON.parse(localStorage.getItem("eg_current_user") || "null")?.role || "student";
+  const { current: user } = useAuth();
+  const userRole = user?.role || "student";
   const messages = (data.messages || []).filter((m) =>
-    Array.isArray(m.to) ? m.to.includes(userRole) || m.to.includes("All") : m.to === userRole || m.to === "All"
+    Array.isArray(m.receiverRole) ? m.receiverRole.includes(userRole) || m.receiverRole.includes("All") : m.receiverRole === userRole || m.receiverRole === "All"
   );
 
   return (
@@ -18,7 +20,7 @@ export default function Messages() {
         {messages.length === 0 ? (
           <p className="text-gray-500">No messages yet.</p>
         ) : (
-          messages.map((m) => <MessageCard key={m.id} sender={m.sender} message={m.message} date={m.date} />)
+          messages.map((m) => <MessageCard key={m.id} sender={m.senderRole} message={m.content} date={m.timestamp} />)
         )}
       </div>
     </motion.div>

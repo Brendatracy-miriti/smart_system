@@ -7,6 +7,10 @@ export { DataContext };
 export const DataProvider = ({ children }) => {
   const [data, setData] = useState({
     users: JSON.parse(localStorage.getItem("users") || localStorage.getItem("eg_users") || "[]"),
+    students: JSON.parse(localStorage.getItem("students") || "[]"),
+    teachers: JSON.parse(localStorage.getItem("teachers") || "[]"),
+    parents: JSON.parse(localStorage.getItem("parents") || "[]"),
+    courses: JSON.parse(localStorage.getItem("courses") || "[]"),
     assignments: JSON.parse(localStorage.getItem("assignments") || localStorage.getItem("eg_assignments") || "[]"),
     submissions: JSON.parse(localStorage.getItem("submissions") || localStorage.getItem("eg_submissions") || "[]"),
     buses: JSON.parse(localStorage.getItem("buses") || localStorage.getItem("eg_transport") || "[]"),
@@ -63,9 +67,20 @@ export const DataProvider = ({ children }) => {
   const addSubmission = (s) => setData((p) => ({ ...p, submissions: [...p.submissions, s] }));
 
   const addMessage = (m) => {
-    // Ensure 'to' is an array for new messages
-    const message = { ...m, to: Array.isArray(m.to) ? m.to : [m.to || "All"] };
+    // Adjust to new structure: { id, senderRole, receiverRole, subject, content, timestamp }
+    const message = {
+      id: m.id || Date.now(),
+      senderRole: m.senderRole || m.sender || "admin",
+      receiverRole: m.receiverRole || m.to || "all",
+      subject: m.subject || m.title || "Notification",
+      content: m.content || m.message || "",
+      timestamp: m.timestamp || new Date().toISOString(),
+    };
     setData((p) => ({ ...p, messages: [...p.messages, message] }));
+  };
+
+  const sendMessage = (messageData) => {
+    addMessage(messageData);
   };
 
   const addBus = (b) => setData((p) => ({ ...p, buses: [...p.buses, b] }));
@@ -96,9 +111,35 @@ export const DataProvider = ({ children }) => {
   const updateMentorshipStatus = (id, status) =>
     setData((p) => ({ ...p, mentorships: p.mentorships.map((m) => (m.id === id ? { ...m, status } : m)) }));
 
+  const updateAttendance = (studentId, status) =>
+    setData((p) => ({
+      ...p,
+      attendance: p.attendance.map((a) =>
+        a.studentId === studentId ? { ...a, status } : a
+      ),
+    }));
+
+  const updateStudentGrades = (studentId, newGrades) =>
+    setData((p) => ({
+      ...p,
+      grades: p.grades.map((g) =>
+        g.studentId === studentId ? { ...g, ...newGrades } : g
+      ),
+    }));
+
+  const updateUserProfile = (userId, profileData) =>
+    setData((p) => ({
+      ...p,
+      users: p.users.map((u) => (u.id === userId ? { ...u, ...profileData } : u)),
+    }));
+
   const refresh = () =>
     setData({
       users: JSON.parse(localStorage.getItem("users") || localStorage.getItem("eg_users") || "[]"),
+      students: JSON.parse(localStorage.getItem("students") || "[]"),
+      teachers: JSON.parse(localStorage.getItem("teachers") || "[]"),
+      parents: JSON.parse(localStorage.getItem("parents") || "[]"),
+      courses: JSON.parse(localStorage.getItem("courses") || "[]"),
       assignments: JSON.parse(localStorage.getItem("assignments") || localStorage.getItem("eg_assignments") || "[]"),
       submissions: JSON.parse(localStorage.getItem("submissions") || localStorage.getItem("eg_submissions") || "[]"),
       buses: JSON.parse(localStorage.getItem("buses") || localStorage.getItem("eg_transport") || "[]"),
@@ -135,6 +176,7 @@ export const DataProvider = ({ children }) => {
         addAssignment,
         addSubmission,
         addMessage,
+        sendMessage,
         addBus,
         upsertBus,
         addFund,
@@ -142,6 +184,9 @@ export const DataProvider = ({ children }) => {
         deleteFund,
         requestMentorship,
         updateMentorshipStatus,
+        updateAttendance,
+        updateStudentGrades,
+        updateUserProfile,
         refresh,
         calculateRisk,
         getAtRiskStudents,

@@ -1,50 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import api from "../../../utils/api";
-import { useMessage } from "../../../hooks/useMessage";
+import { useData } from "../../../context/DataContext";
+import { useAuth } from "../../../context/AuthContext";
 import MiniChart from "../../../ui/MiniChart";
 import StatCard from "../../../ui/StatCard";
-
-import { useContext } from "react";
-import { DataContext } from "../../../context/DataContext";
 import { AlertTriangle } from "lucide-react";
 
 export default function TeacherDashboard() {
-  const [loading, setLoading] = useState(true);
+  const { data, calculateRisk } = useData();
+  const { current: currentUser } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [classes, setClasses] = useState([]);
   const [performance, setPerformance] = useState([]);
-  const { setMessage } = useMessage();
 
-  const dataContext = useContext(DataContext);
-  const students = dataContext?.students || [];
-  const calculateRisk = dataContext?.calculateRisk || (() => "Unknown");
-  // You may need to define currentUser if not already defined
-  const currentUser = JSON.parse(localStorage.getItem("eg_current_user"));
-  const myAtRisk = students.filter(
-    (s) => s.teacherId === currentUser?.id && calculateRisk(s) === "At-Risk"
-  );
+  const students = data?.students || [];
+  const assignments = data?.assignments || [];
+  const timetables = data?.timetable || [];
+
+  const myStudents = students.filter(s => s.teacherId === currentUser?.id);
+  const myAssignments = assignments.filter(a => a.teacherId === currentUser?.id);
+  const myTimetables = timetables.filter(t => t.teacherId === currentUser?.id);
+  const myAtRisk = myStudents.filter(s => calculateRisk(s) === "At-Risk");
 
   useEffect(() => {
-    let mounted = true;
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [classRes, perfRes] = await Promise.all([
-          api.get("classes/"),
-          api.get("students/performance/"),
-        ]);
-        if (!mounted) return;
-        setClasses(classRes.data || []);
-        setPerformance(perfRes.data || []);
-      } catch (e) {
-        setMessage({ type: "error", text: "Failed to fetch teacher data" });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-    return () => (mounted = false);
-  }, [setMessage]);
+    // Simulate loading for local data
+    setLoading(true);
+    setTimeout(() => {
+      setClasses(myTimetables);
+      setPerformance(myStudents.map(s => ({ label: s.name, value: s.avgScore || 0 })));
+      setLoading(false);
+    }, 500);
+  }, [myStudents, myTimetables]);
 
   return (
     <motion.div
@@ -62,8 +48,8 @@ export default function TeacherDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard title="My Classes" value={classes.length} color="blue-500" />
-        <StatCard title="Average Attendance" value="91%" color="green-500" />
-        <StatCard title="Active Assignments" value="6" color="cyan-500" />
+        <StatCard title="My Students" value={myStudents.length} color="green-500" />
+        <StatCard title="Active Assignments" value={myAssignments.length} color="cyan-500" />
       </div>
 
       <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow mt-6">

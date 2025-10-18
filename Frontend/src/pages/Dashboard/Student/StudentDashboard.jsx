@@ -5,19 +5,17 @@ import ProgressRing from "../../../ui/ProgressRing";
 import MiniCard from "../../../ui/MiniCard";
 import MessageCard from "../../../ui/MessageCard";
 import { BookOpen, Clock, ClipboardList, BarChart2, MessageSquare } from "lucide-react";
-import { useLive } from "../../../context/LiveContext";
 import { useData } from "../../../context/DataContext";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function StudentDashboard() {
   const { current: user } = useAuth();
-  const liveData = useLive();
   const { data } = useData();
   // Defensive: fallback to empty arrays if context is not ready
-  const timetables = liveData?.timetable || [];
-  const assignments = liveData?.assignments || [];
-  const submissions = liveData?.submissions || [];
-  const grades = liveData?.grades || [];
+  const timetables = data?.timetable || [];
+  const assignments = data?.assignments || [];
+  const submissions = data?.submissions || [];
+  const grades = data?.grades || [];
   const messages = data?.messages || [];
   const [profile, setProfile] = useState(null);
   const [upcoming, setUpcoming] = useState([]);
@@ -148,7 +146,7 @@ export default function StudentDashboard() {
         {messages.length ? (
           <div className="space-y-3">
             {messages.slice(0, 3).map((m) => (
-              <MessageCard key={m.id} sender={m.sender} message={m.message} date={m.date} />
+              <MessageCard key={m.id} sender={m.senderRole} message={m.content} date={m.timestamp} />
             ))}
           </div>
         ) : (<p className="text-gray-500">No messages yet.</p>)}

@@ -1,21 +1,21 @@
-import React, { useEffect, useState, useContext } from "react";
-import { useLive } from "../../../context/LiveContext";
+import React, { useEffect, useState } from "react";
+import { useData } from "../../../context/DataContext";
+import { useAuth } from "../../../context/AuthContext";
 import Papa from "papaparse";
-
-import { DataContext } from "../../../context/DataContext";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 
 export default function ParentDashboard() {
-  const liveData = useLive();
-  // Defensive: fallback to empty arrays if context is not ready
-  const parents = liveData?.parents || [];
-  const students = liveData?.students || [];
-  const assignments = liveData?.assignments || [];
-  const timetables = liveData?.timetables || [];
-  const attendance = liveData?.attendance || [];
-  const grades = liveData?.grades || [];
+  const { data, calculateRisk } = useData();
+  const { current: user } = useAuth();
 
-  const user = JSON.parse(localStorage.getItem("eg_current_user"));
+  // Defensive: fallback to empty arrays if context is not ready
+  const parents = data?.parents || [];
+  const students = data?.students || [];
+  const assignments = data?.assignments || [];
+  const timetables = data?.timetable || [];
+  const attendance = data?.attendance || [];
+  const grades = data?.grades || [];
+
   const parent = parents.find(p => p.userId === user?.id);
   const child = students.find(s => s.id === parent?.childStudentId);
 
@@ -25,7 +25,6 @@ export default function ParentDashboard() {
   const childGrades = grades.filter(g => g.studentEmail === child?.email);
   const childAttendance = attendance.filter(a => a.studentId === child?.id);
 
-  const { calculateRisk } = useContext(DataContext);
   const risk = child ? calculateRisk(child) : "Unknown";
 
   // Finance transparency state

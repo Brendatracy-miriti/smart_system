@@ -1,17 +1,13 @@
 import React from "react";
-import { useLive } from "../../../context/LiveContext";
-import { addAttendance } from "../../../utils/localData";
+import { useData } from "../../../context/DataContext";
 import { useAuth } from "../../../context/AuthContext";
-import { useMessage } from "../../../context/MessageContext";
 import { v4 as uuidv4 } from "uuid";
 
 export default function TeacherAttendance() {
-  const liveData = useLive();
-  const students = liveData?.students || [];
-  const classes = liveData?.classes || [];
-  const refresh = liveData?.refresh;
+  const { data, addAttendance, refresh } = useData();
+  const students = data?.students || [];
   const { current } = useAuth();
-  const { setMessage } = useMessage();
+  const [message, setMessage] = React.useState(null);
 
   // For simplicity, present list of students to mark present
   const handleMark = (student) => {

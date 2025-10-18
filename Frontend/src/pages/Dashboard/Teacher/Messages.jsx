@@ -2,32 +2,33 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import MessageCard from "../../../ui/MessageCard";
 import { useData } from "../../../context/DataContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Messages() {
-  const { data, addMessage } = useData();
+  const { data, sendMessage } = useData();
+  const { current: user } = useAuth();
   const [showCompose, setShowCompose] = useState(false);
-  const [to, setTo] = useState("");
-  const [message, setMessage] = useState("");
+  const [receiverRole, setReceiverRole] = useState("");
+  const [subject, setSubject] = useState("");
+  const [content, setContent] = useState("");
 
-  const userRole = JSON.parse(localStorage.getItem("eg_current_user") || "null")?.role || "teacher";
+  const userRole = user?.role || "teacher";
   const messages = (data.messages || []).filter((m) =>
-    Array.isArray(m.to) ? m.to.includes(userRole) || m.to.includes("All") : m.to === userRole || m.to === "All"
+    Array.isArray(m.receiverRole) ? m.receiverRole.includes(userRole) || m.receiverRole.includes("All") : m.receiverRole === userRole || m.receiverRole === "All"
   );
 
   const send = () => {
-    if (!message) return alert("Enter message");
-    const m = {
-      id: Date.now(),
-      sender: JSON.parse(localStorage.getItem("eg_current_user") || "null")?.name || "Teacher",
-      to,
-      message,
-      date: new Date().toLocaleString(),
-    };
-    addMessage(m);
-    setMessage("");
-    setTo("");
+    if (!content) return alert("Enter message");
+    sendMessage({
+      senderRole: userRole,
+      receiverRole: receiverRole || "All",
+      subject: subject || "Message",
+      content,
+    });
+    setContent("");
+    setSubject("");
+    setReceiverRole("");
     setShowCompose(false);
-    window.dispatchEvent(new Event("storage"));
   };
 
   return (
@@ -46,8 +47,9 @@ export default function Messages() {
 
       {showCompose && (
         <div className="bg-white dark:bg-[#1F2937] p-4 rounded-2xl shadow mb-4">
-          <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="To (optional)" className="w-full p-2 border rounded mb-2" />
-          <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Write message..." className="w-full p-2 border rounded mb-2" />
+          <input value={receiverRole} onChange={(e) => setReceiverRole(e.target.value)} placeholder="To (role, e.g., student, parent, All)" className="w-full p-2 border rounded mb-2" />
+          <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" className="w-full p-2 border rounded mb-2" />
+          <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Write message..." className="w-full p-2 border rounded mb-2" />
           <div className="flex justify-end">
             <button onClick={send} className="px-4 py-2 bg-green-600 text-white rounded">Send</button>
           </div>
@@ -57,7 +59,7 @@ export default function Messages() {
       {messages.length === 0 ? (
         <p className="text-gray-500">No messages yet.</p>
       ) : (
-        messages.map((m) => <MessageCard key={m.id} sender={m.sender} message={m.message} date={m.date} />)
+        messages.map((m) => <MessageCard key={m.id} sender={m.senderRole} message={m.content} date={m.timestamp} />)
       )}
     </motion.div>
   );
