@@ -69,7 +69,7 @@ export default function Signup() {
       };
 
       if (!lookup(childStudentId)) {
-        setMessage({ type: "error", text: "No Child with that Admission Number" });
+        setMessage({ type: "error", text: "No Child with that Admission Number. Please ensure the student has been registered first." });
         return;
       }
     }
