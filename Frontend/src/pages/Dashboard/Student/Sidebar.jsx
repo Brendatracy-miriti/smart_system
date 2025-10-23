@@ -21,7 +21,7 @@ export default function StudentSidebar() {
   const [open, setOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { logout } = useAuth();
+  const { logout, current: user } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -47,9 +47,14 @@ export default function StudentSidebar() {
         <div>
           {/* Top Section */}
           <div className="flex items-center justify-between p-4 border-b border-blue-600">
-            <h2 className={`text-white font-bold text-lg transition-all duration-300 ${!open && "opacity-0 hidden"}`}>
-              Edu-Guardian
-            </h2>
+            <div className={`transition-all duration-300 ${!open && "opacity-0 hidden"}`}>
+              <h2 className="text-white font-bold text-lg">Edu-Guardian</h2>
+              {user && (
+                <p className="text-xs text-gray-300 mt-1">
+                  {user.name} - {user.course || "No Course"}
+                </p>
+              )}
+            </div>
             <button onClick={() => setOpen(!open)} className="text-white focus:outline-none">
               {open ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -110,7 +115,14 @@ export default function StudentSidebar() {
             >
               <div>
                 <div className="flex items-center justify-between p-4 border-b border-blue-600">
-                  <h2 className="text-white font-bold text-lg">Edu-Guardian</h2>
+                  <div>
+                    <h2 className="text-white font-bold text-lg">Edu-Guardian</h2>
+                    {user && (
+                      <p className="text-xs text-gray-300 mt-1">
+                        {user.name} - {user.course || "No Course"}
+                      </p>
+                    )}
+                  </div>
                   <button onClick={() => setMobileOpen(false)} className="text-white focus:outline-none">
                     <X size={22} />
                   </button>
