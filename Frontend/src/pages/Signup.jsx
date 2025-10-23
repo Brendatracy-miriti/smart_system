@@ -94,7 +94,7 @@ export default function Signup() {
           .filter(Boolean);
       }
 
-      await signup({ name: trimmedName, username: trimmedUsername, email: trimmedEmail, password: trimmedPassword, role, extra });
+      await signup({ name: trimmedName, username: trimmedUsername, email: trimmedEmail, password: trimmedPassword, role, ...extra });
       setMessage({ type: "success", text: "Signup success!" });
       navigate(`/${role}`);
     } catch (err) {
