@@ -25,8 +25,8 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // load from DataContext/localStorage
-      let local = Array.isArray(data?.users) ? data.users : [];
+      // load from DataContext/localStorage, exclude seed users (IDs 1-6)
+      let local = Array.isArray(data?.users) ? data.users.filter((u) => u.id > 6) : [];
       if (!showInactive) local = local.filter((u) => u.is_active !== false);
       setUsers(local);
       setLoading(false);
@@ -91,7 +91,7 @@ export default function Users() {
       setShowModal(false);
       setEditingUser(null);
       // refresh local list
-      const local = Array.isArray(data?.users) ? data.users : [];
+      const local = Array.isArray(data?.users) ? data.users.filter((u) => u.id > 6) : [];
       setUsers(local);
     } catch (err) {
       console.error(err);
