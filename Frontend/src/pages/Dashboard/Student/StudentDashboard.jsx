@@ -66,7 +66,7 @@ export default function StudentDashboard() {
           }
         });
       });
-  }, [timetables, assignments, submissions, grades]);
+  }, [user, timetables, assignments, submissions, grades]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="space-y-6">

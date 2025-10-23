@@ -85,7 +85,7 @@ export default function StudentSidebar() {
 <div className="px-4 border-t border-blue-600 mt-auto mb-4 flex flex-col gap-2">
   <button
     onClick={handleLogout}
-    className=" items-center gap-3 px-4 py-2 w-full text-sm text-gray-200 rounded-lg hover:bg-red-600/80 transition-all"
+    className="flex items-center gap-3 px-4 py-2 w-full text-sm text-gray-200 rounded-lg hover:bg-red-600/80 transition-all"
   >
     <LogOut size={20} />
     {open && <span>Logout</span>}
