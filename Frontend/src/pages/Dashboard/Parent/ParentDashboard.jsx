@@ -17,9 +17,9 @@ export default function ParentDashboard() {
   const grades = data?.grades || [];
 
   const parent = parents.find(p => p.userId === user?.id);
-  const child = students.find(s => s.id === parent?.childStudentId);
+  const child = students.find(s => s.admission_number === parent?.childStudentId);
 
-  if (!parent) return <div className="p-4">No child linked. Link in Settings.</div>;
+  if (!parent || !parent.childStudentId) return <div className="p-4">No child linked. Link in Settings.</div>;
 
   const childAssignments = assignments.filter(a => a.course === child?.course);
   const childGrades = grades.filter(g => g.studentEmail === child?.email);

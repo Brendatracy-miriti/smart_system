@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import { DataContext } from "../../../context/DataContext";
+import { getStudents } from "../../../utils/localData";
 
 export default function ProfileSettings() {
   const { data, updateUser } = useContext(DataContext);
@@ -10,6 +11,7 @@ export default function ProfileSettings() {
     name: currentUser?.name || "",
     email: currentUser?.email || "",
     avatar: currentUser?.avatar || "",
+    childStudentId: currentUser?.childStudentId || "",
   });
   const [passwords, setPasswords] = useState({
     current: "",
@@ -87,6 +89,19 @@ export default function ProfileSettings() {
             className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent"
           />
         </div>
+
+        {currentUser?.role === "parent" && (
+          <div>
+            <label className="block text-sm font-medium mb-1">Link Child (Admission Number)</label>
+            <input
+              value={form.childStudentId}
+              onChange={(e) => setForm((p) => ({ ...p, childStudentId: e.target.value }))}
+              placeholder="e.g. ADM0001"
+              className="w-full p-3 border rounded-lg bg-transparent dark:border-gray-600 focus:ring-2 focus:ring-accent"
+            />
+            <p className="text-xs text-gray-500 mt-1">Enter the child's admission number to link their data.</p>
+          </div>
+        )}
 
         <button
           onClick={handleSave}

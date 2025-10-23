@@ -16,10 +16,17 @@
     course: s.course,
     attendanceRate: s.attendance_rate || 80,
     avgScore: s.average_score || 70,
+    admission_number: `ADM${String(s.id).padStart(4, '0')}`, // add admission number for lookup
   }));
 
   const teachers = users.filter(u => u.role === 'teacher');
-  const parents = users.filter(u => u.role === 'parent');
+  const parents = users.filter(u => u.role === 'parent').map(p => ({
+    id: p.id,
+    userId: p.id,
+    name: p.name,
+    email: p.email,
+    childStudentId: `ADM${String(p.childId).padStart(4, '0')}`, // use admission number instead of ID
+  }));
 
   const buses = [
     { id: 'bus-1', busId: 'B001', driver: 'John Driver', capacity: 40 },

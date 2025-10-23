@@ -23,6 +23,49 @@ export const AuthProvider = ({ children }) => {
     const newUser = addUser(userData);
     setCurrent(newUser);
     localStorage.setItem("eg_current_user", JSON.stringify(newUser));
+
+    // If student, also add to students array
+    if (newUser.role === "student") {
+      const { addStudent } = await import("../utils/localData");
+      addStudent({
+        id: newUser.id,
+        userId: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        admission_number: newUser.admission_number,
+        course: newUser.course,
+        attendance_rate: 80,
+        average_score: 70,
+        courses_count: 1,
+        completed_assignments: 0,
+        gpa: 0,
+      });
+    }
+
+    // If teacher, add to teachers array
+    if (newUser.role === "teacher") {
+      const { addTeacher } = await import("../utils/localData");
+      addTeacher({
+        id: newUser.id,
+        userId: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        courses: newUser.courses || [],
+      });
+    }
+
+    // If parent, add to parents array
+    if (newUser.role === "parent") {
+      const { addParent } = await import("../utils/localData");
+      addParent({
+        id: newUser.id,
+        userId: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        childStudentId: newUser.childStudentId || null,
+      });
+    }
+
     return newUser;
   };
 

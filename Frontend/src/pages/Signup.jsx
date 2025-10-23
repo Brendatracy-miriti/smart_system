@@ -282,13 +282,14 @@ export default function Signup() {
 
             {role === "parent" && (
               <div>
-                <label className="block mb-2 text-sm">Link to Child</label>
+                <label className="block mb-2 text-sm">Link to Child (Admission Number)</label>
                 <input
                   value={childStudentId}
                   onChange={(e) => setChildStudentId(e.target.value)}
-                  placeholder="Child student ID"
+                  placeholder="e.g. ADM0001"
                   className="w-full px-4 py-2 rounded-md bg-[#1E293B] text-white outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-400 mt-1">Enter the child's admission number to link their data.</p>
               </div>
             )}
 

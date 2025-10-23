@@ -45,6 +45,47 @@ export default function Users() {
       } else {
         const u = { id: Date.now(), ...data };
         addUser(u);
+        // If student, also add to students array
+        if (u.role === "student") {
+          const { addStudent } = await import("../../../utils/localData");
+          addStudent({
+            id: u.id,
+            userId: u.id,
+            name: u.name,
+            email: u.email,
+            admission_number: u.admission_number,
+            course: u.course,
+            attendance_rate: 80,
+            average_score: 70,
+            courses_count: 1,
+            completed_assignments: 0,
+            gpa: 0,
+          });
+        }
+
+        // If teacher, add to teachers array
+        if (u.role === "teacher") {
+          const { addTeacher } = await import("../../../utils/localData");
+          addTeacher({
+            id: u.id,
+            userId: u.id,
+            name: u.name,
+            email: u.email,
+            courses: u.courses || [],
+          });
+        }
+
+        // If parent, add to parents array
+        if (u.role === "parent") {
+          const { addParent } = await import("../../../utils/localData");
+          addParent({
+            id: u.id,
+            userId: u.id,
+            name: u.name,
+            email: u.email,
+            childStudentId: u.childStudentId || null,
+          });
+        }
         setMessage({ type: "success", text: "User created successfully!" });
       }
       setShowModal(false);

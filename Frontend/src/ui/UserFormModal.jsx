@@ -7,6 +7,9 @@ export default function UserFormModal({ show, onClose, onSave, editingUser }) {
     email: "",
     role: "student",
     is_active: true,
+    admission_number: "",
+    course: "",
+    childStudentId: "",
   });
 
   useEffect(() => {
@@ -68,6 +71,44 @@ export default function UserFormModal({ show, onClose, onSave, editingUser }) {
               <option value="parent">Parent</option>
             </select>
           </div>
+          {form.role === "student" && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-1">Admission Number</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent"
+                  value={form.admission_number}
+                  onChange={(e) => setForm({ ...form, admission_number: e.target.value })}
+                  placeholder="e.g. ADM0001"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Course</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent"
+                  value={form.course}
+                  onChange={(e) => setForm({ ...form, course: e.target.value })}
+                  placeholder="e.g. Mathematics"
+                />
+              </div>
+            </>
+          )}
+
+          {form.role === "parent" && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Child Student ID</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent"
+                value={form.childStudentId}
+                onChange={(e) => setForm({ ...form, childStudentId: e.target.value })}
+                placeholder="e.g. ADM0001"
+              />
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
