@@ -23,8 +23,11 @@ export default function StudentSidebar() {
   const { theme, toggleTheme } = useTheme();
   const { logout, current: user } = useAuth();
 
+  const navigate = useNavigate();
+
   const handleLogout = () => {
     logout();
+    navigate('/login');
   };
 
   const links = [
