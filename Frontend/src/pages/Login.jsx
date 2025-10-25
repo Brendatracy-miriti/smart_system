@@ -21,13 +21,17 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await login({ identifier: identifier.trim(), password: password.trim() });
-      // redirect based on role
-      if (user?.role === "admin") navigate("/admin/dashboard");
-      else if (user?.role === "teacher") navigate("/teacher");
-      else if (user?.role === "parent") navigate("/parent");
-      else if (user?.role === "student") navigate("/student");
-    } catch {
-      setMessage({ type: "error", text: "Login failed, please try again." });
+      // Redirect based on role (fetched from AuthContext)
+      const userRole = user?.role;  // This will be set after login via onAuthStateChanged
+      if (userRole === "admin") navigate("/admin/dashboard");
+      else if (userRole === "teacher") navigate("/teacher");
+      else if (userRole === "parent") navigate("/parent");
+      else if (userRole === "student") navigate("/student");
+      else {
+        setMessage({ type: "error", text: "Role not found. Please contact admin." });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: error.message || "Login failed, please try again." });
     } finally {
       setLoading(false);
     }
