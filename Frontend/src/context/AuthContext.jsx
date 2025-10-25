@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { addUser, findUserByEmail, getUsers } from "../utils/localData";
+import { addUser, findUserByEmail, getUsers, addStudent, addTeacher, addParent } from "../utils/localData";
 
 const AuthContext = createContext();
 
@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }) => {
 
     // If student, also add to students array
     if (newUser.role === "student") {
-      const { addStudent } = await import("../utils/localData");
       addStudent({
         id: newUser.id,
         userId: newUser.id,
@@ -44,7 +43,6 @@ export const AuthProvider = ({ children }) => {
 
     // If teacher, add to teachers array
     if (newUser.role === "teacher") {
-      const { addTeacher } = await import("../utils/localData");
       addTeacher({
         id: newUser.id,
         userId: newUser.id,
@@ -56,7 +54,6 @@ export const AuthProvider = ({ children }) => {
 
     // If parent, add to parents array
     if (newUser.role === "parent") {
-      const { addParent } = await import("../utils/localData");
       addParent({
         id: newUser.id,
         userId: newUser.id,
@@ -71,17 +68,31 @@ export const AuthProvider = ({ children }) => {
 
   const login = async ({ identifier, password }) => {
     // Find user by email, name, or username (case-insensitive)
-    if (!identifier) throw new Error("Invalid credentials");
+    if (!identifier || !password) throw new Error("Invalid credentials");
     const id = String(identifier).trim().toLowerCase();
+    const pwd = password.trim();
     const all = getUsers();
-    let user = all.find((u) => (u.email && u.email.toLowerCase() === id) || (u.name && u.name.toLowerCase() === id) || (u.username && u.username.toLowerCase() === id));
+    
+    // Search for user matching identifier
+    let user = all.find((u) => 
+      (u.email && u.email.toLowerCase() === id) || 
+      (u.name && u.name.toLowerCase() === id) || 
+      (u.username && u.username.toLowerCase() === id)
+    );
 
-    if (user && user.password === password.trim()) {
-      setCurrent(user);
-      localStorage.setItem("eg_current_user", JSON.stringify(user));
-      return user;
+    if (!user) {
+      throw new Error("No user found with that email, name, or username.");
     }
-    throw new Error("Invalid credentials");
+
+    // Check password (note: in a real app, use hashed passwords for security)
+    if (user.password !== pwd) {
+      throw new Error("Invalid password.");
+    }
+
+    // Set current user and persist
+    setCurrent(user);
+    localStorage.setItem("eg_current_user", JSON.stringify(user));
+    return user;
   };
 
   const logout = () => {

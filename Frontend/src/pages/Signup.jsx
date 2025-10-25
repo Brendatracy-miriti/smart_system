@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useData } from "../context/DataContext";
-import { getStudents as getLocalStudents } from "../utils/localData";
+import { getUsers } from "../utils/localData";  // Updated import for validation
 import { useMessage } from "../context/MessageContext";
 import loginIllustration from "../assets/login-signup illustration.svg";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -48,28 +48,21 @@ export default function Signup() {
       return;
     }
 
-    // If parent, ensure the referenced child exists
+    // If parent, ensure the referenced child exists in localData
     if (role === "parent") {
-      const lookup = (id) => {
-        if (!id) return false;
-        const q = id.trim();
-        // check DataContext users (role=student)
-        try {
-          const ctxStudents = (data && data.users) ? data.users.filter((u) => u.role === "student") : [];
-          if (ctxStudents.some((s) => (s.admission_number && s.admission_number === q) || s.id === q || (s.username && s.username === q))) return true;
-        } catch (e) {}
+      const childId = childStudentId.trim();
+      if (!childId) {
+        setMessage({ type: "error", text: "Please enter a child admission number." });
+        return;
+      }
 
-        // check localData students
-        try {
-          const ls = getLocalStudents();
-          if (ls.some((s) => (s.admission_number && s.admission_number === q) || s.id === q || (s.username && s.username === q))) return true;
-        } catch (e) {}
-
-        return false;
-      };
-
-      if (!lookup(childStudentId)) {
-        setMessage({ type: "error", text: "No Child with that Admission Number. Please ensure the student has been registered first." });
+      // Check localData for student with matching admission_number
+      const allUsers = getUsers();
+      const studentExists = allUsers.some(
+        (u) => u.role === "student" && u.admission_number === childId
+      );
+      if (!studentExists) {
+        setMessage({ type: "error", text: "No student found with that admission number. Ensure the student is registered first." });
         return;
       }
     }
