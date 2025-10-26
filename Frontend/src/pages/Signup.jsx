@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useData } from "../context/DataContext";
-import { getUsers } from "../utils/localData";  // Updated import for validation
+import { getUsers, getStudents } from "../utils/localData";  // Added getStudents for dual check
 import { useMessage } from "../context/MessageContext";
 import loginIllustration from "../assets/login-signup illustration.svg";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -48,21 +48,37 @@ export default function Signup() {
       return;
     }
 
-    // If parent, ensure the referenced child exists in localData
+    // If parent, ensure the referenced child exists (enhanced check)
     if (role === "parent") {
-      const childId = childStudentId.trim();
+      const childId = childStudentId.trim();  // Normalize input: trim spaces
       if (!childId) {
         setMessage({ type: "error", text: "Please enter a child admission number." });
         return;
       }
 
-      // Check localData for student with matching admission_number
+      // Query both users and students arrays for redundancy
       const allUsers = getUsers();
-      const studentExists = allUsers.some(
-        (u) => u.role === "student" && u.admission_number === childId
+      const allStudents = getStudents();
+      
+      // Check users array (students have role="student")
+      const userMatch = allUsers.some(
+        (u) => u.role === "student" && u.admission_number && u.admission_number.trim() === childId
       );
-      if (!studentExists) {
-        setMessage({ type: "error", text: "No student found with that admission number. Ensure the student is registered first." });
+      
+      // Check students array directly
+      const studentMatch = allStudents.some(
+        (s) => s.admission_number && s.admission_number.trim() === childId
+      );
+
+      // Debugging logs (remove in production)
+      console.log("Parent signup check:");
+      console.log("Entered childId:", childId);
+      console.log("Users array:", allUsers.filter(u => u.role === "student"));
+      console.log("Students array:", allStudents);
+      console.log("User match:", userMatch, "Student match:", studentMatch);
+
+      if (!userMatch && !studentMatch) {
+        setMessage({ type: "error", text: `No student found with admission number "${childId}". Ensure the student is registered first and the number matches exactly.` });
         return;
       }
     }
@@ -72,7 +88,7 @@ export default function Signup() {
       const extra = {};
 
       if (role === "student") {
-        extra.admission_number = admission.trim();
+        extra.admission_number = admission.trim().toLowerCase();  // Ensure it's trimmed here too
         extra.course = course.trim();
       }
 
@@ -96,6 +112,8 @@ export default function Signup() {
       setLoading(false);
     }
   };
+
+
 
   const leftVariants = {
     hidden: { x: -50, opacity: 0 },
