@@ -3,10 +3,12 @@ import { motion } from "framer-motion";
 import MessageCard from "../../../ui/MessageCard";
 import { useData } from "../../../context/DataContext";
 import { useAuth } from "../../../context/AuthContext";
+import { useMessage } from "../../../hooks/useMessage";
 
 export default function Messages() {
   const { data, sendMessage } = useData();
   const { current: user } = useAuth();
+  const { setMessage } = useMessage();
   const [showCompose, setShowCompose] = useState(false);
   const [receiverRole, setReceiverRole] = useState("");
   const [subject, setSubject] = useState("");
@@ -25,6 +27,7 @@ export default function Messages() {
       subject: subject || "Message",
       content,
     });
+    setMessage({ type: "success", text: "Message sent successfully!" });
     setContent("");
     setSubject("");
     setReceiverRole("");
