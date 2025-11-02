@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import UserTable from "../../../ui/UserTable";
 import UserFormModal from "../../../ui/UserFormModal";
+import ConfirmDialog from "../../../ui/ConfirmDialog";
 import { useMessage } from "../../../hooks/useMessage";
 import { useData } from "../../../context/DataContext";
 import { updateUser as updateLocalUser } from "../../../utils/localData";
@@ -13,6 +14,8 @@ export default function Users() {
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [showInactive, setShowInactive] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   // persist showInactive preference
   useEffect(() => {
     try {
@@ -100,16 +103,28 @@ export default function Users() {
   };
 
   const handleDelete = async (u) => {
-    if (!window.confirm(`Delete ${u.name}?`)) return;
+    setUserToDelete(u);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
     try {
       // remove locally
-      setData((p) => ({ ...p, users: p.users.filter((x) => x.id !== u.id) }));
+      setData((p) => ({ ...p, users: p.users.filter((x) => x.id !== userToDelete.id) }));
       setMessage({ type: "success", text: "User deleted successfully!" });
-      const local = Array.isArray(data?.users) ? data.users.filter((x) => x.id !== u.id) : [];
+      const local = Array.isArray(data?.users) ? data.users.filter((x) => x.id !== userToDelete.id) : [];
       setUsers(local);
     } catch {
       setMessage({ type: "error", text: "Failed to delete user." });
     }
+    setShowConfirmDialog(false);
+    setUserToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setShowConfirmDialog(false);
+    setUserToDelete(null);
   };
 
   const toggleActive = (u) => {
@@ -176,6 +191,14 @@ export default function Users() {
           setEditingUser(null);
         }}
         onSave={handleSave}
+      />
+
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete ${userToDelete?.name}? This action cannot be undone.`}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
       />
     </motion.div>
   );
