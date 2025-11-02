@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import api from "../../../utils/api";
-import { useMessage } from "../../../hooks/useMessage";
+import { useData } from "../../../context/DataContext";
+import { useAuth } from "../../../context/AuthContext";
+import { useMessage } from "../../../context/MessageContext";
 
 export default function Courses() {
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState([]);
+  const { data } = useData();
+  const { current: user } = useAuth();
   const { setMessage } = useMessage();
 
   useEffect(() => {
     let mounted = true;
-    const fetchCourses = async () => {
+    const fetchCourses = () => {
       setLoading(true);
       try {
-        const res = await api.get("student/courses/");
-        if (!mounted) return;
-        setCourses(res.data || []);
+        // Get courses from local data
+        const allCourses = data.courses || [];
+        // Filter courses for the current student (assuming student has enrolled courses)
+        // For now, show all courses or filter based on user data
+        setCourses(allCourses);
       } catch (err) {
         console.error(err);
         setMessage({ type: "error", text: "Could not fetch courses." });
@@ -25,7 +30,7 @@ export default function Courses() {
     };
     fetchCourses();
     return () => (mounted = false);
-  }, [setMessage]);
+  }, [data, setMessage]);
 
   return (
     <motion.div
