@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import MessageCard from "../../../ui/MessageCard";
 import { useData } from "../../../context/DataContext";
 import { useAuth } from "../../../context/AuthContext";
-import { useMessage } from "../../../hooks/useMessage";
+import { useMessage } from "../../../context/MessageContext";
 
 export default function Messages() {
   const { data, sendMessage } = useData();
