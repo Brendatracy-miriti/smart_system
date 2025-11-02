@@ -8,6 +8,7 @@ const COLORS = ["#10B981", "#38BDF8", "#1E3A8A", "#F59E0B", "#EF4444"];
 
 export default function Funds() {
   const { data, addFund } = useData();
+  const { theme } = useTheme();
   const funds = data.funds || [];
   const [form, setForm] = useState({ source: "", amount: "", note: "" });
 
