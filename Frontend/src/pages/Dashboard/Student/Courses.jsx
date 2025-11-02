@@ -18,9 +18,17 @@ export default function Courses() {
       try {
         // Get courses from local data
         const allCourses = data.courses || [];
-        // Filter courses for the current student (assuming student has enrolled courses)
-        // For now, show all courses or filter based on user data
-        setCourses(allCourses);
+        // Filter courses based on the student's registered course
+        const studentCourse = user?.course;
+        if (studentCourse) {
+          const filteredCourses = allCourses.filter(course =>
+            course.name.toLowerCase().includes(studentCourse.toLowerCase()) ||
+            course.description.toLowerCase().includes(studentCourse.toLowerCase())
+          );
+          setCourses(filteredCourses);
+        } else {
+          setCourses(allCourses);
+        }
       } catch (err) {
         console.error(err);
         setMessage({ type: "error", text: "Could not fetch courses." });
@@ -30,7 +38,7 @@ export default function Courses() {
     };
     fetchCourses();
     return () => (mounted = false);
-  }, [data, setMessage]);
+  }, [data, user, setMessage]);
 
   return (
     <motion.div
